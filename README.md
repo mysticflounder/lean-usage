@@ -17,6 +17,7 @@ The report cites the plugin sources in this repository, so its links resolve her
 | Guard hooks | `plugins/lean-usage/hooks/` | Deploys the wrapper at session start, warns on direct `lake`/`lean` invocations, and blocks builds when the mathlib cache is missing or stale. |
 | Skills | `plugins/*/skills/` | See the table below. |
 | Report and data | `docs/reports/` | The report, its PDF rendering, the weekly chart, and the CSV files behind it. |
+| Example wrapper | `examples/lake-build-example` | A portable, trimmed version of the wrapper for adoption elsewhere. See below. |
 
 ## Skills
 
@@ -47,6 +48,27 @@ The wrapper writes two JSONL logs under `~/.local/state/lean-usage/`
 The report's compile-cost figures come from the second log. Whole-run wall
 times are not a cost measure, because a run's record does not say how much of
 the project it rebuilt; the report explains this in its timing section.
+
+## Example wrapper
+
+`examples/lake-build-example` is a self-contained Python script, based on the
+production wrapper, that keeps the parts behind the report's telemetry and
+drops the house-specific ones (proof-blueprint resync, spine archives, session
+identity, hook deployment). It needs only Python 3 and a Lean toolchain on
+`PATH`. From anywhere inside a Lake project:
+
+```
+examples/lake-build-example              # lake build
+examples/lake-build-example Foo.Bar      # lake build Foo.Bar
+MEMORY_MB=8192 examples/lake-build-example
+```
+
+It walks up to the lakefile, takes a stale-PID-aware lock per project, keeps
+the live output in `.lake/lake-build-logs/`, caps each `lean` worker's memory
+through a PATH shim, runs `lake exe cache get` first for mathlib projects and
+refuses to build if that fails, and writes the same two JSONL logs as the
+production wrapper. Its header comment documents every environment variable and
+gives `jq` recipes for reading the logs.
 
 ## Install
 
