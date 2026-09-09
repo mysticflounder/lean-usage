@@ -592,7 +592,8 @@ def main() -> int:
             err(
                 f"{PROG}: build took {duration // 60}m{duration % 60:02d}s — over the "
                 f"{budget_ceil_s // 60}m refactor ceiling. Shard the slowest modules "
-                "(profile with `/usr/bin/time -l lake env lean <file>`); see the "
+                "(profile with the platform resource monitor, e.g. `/usr/bin/time -l` "
+                "on macOS or `/usr/bin/time -v` on Linux); see the "
                 "lean-usage build-time budget."
             )
         elif duration > budget_target_s:

@@ -1,6 +1,6 @@
 {
   "name": "lean-usage",
-  "version": "0.1.61",
+  "version": "0.1.62",
   "description": "Lean 4 build and proof tooling: lake-build governance, lean-shard, and DRAT-to-Lean.",
   "skills": "./skills/",
   "hooks": "./codex-hooks.json",

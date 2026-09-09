@@ -49,4 +49,4 @@ or treat this repository as the publication copy.
   `Usage:` lines.
 - `docs/` is date-prefixed: `docs/<kind>/YYYY-MM-DD-slug.md`.
 - Commit only your own edits; `git pull --rebase --autostash` before pushing.
-- macOS only.
+- macOS and Linux only.

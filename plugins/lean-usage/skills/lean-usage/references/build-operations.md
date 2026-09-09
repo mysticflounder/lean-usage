@@ -91,8 +91,20 @@ is idle:
 
 ```bash
 pgrep -x lean | wc -l
-sysctl -n vm.loadavg        # macOS
-sysctl -n hw.ncpu           # macOS
+```
+
+On macOS, also inspect load and CPU count with:
+
+```bash
+sysctl -n vm.loadavg
+sysctl -n hw.ncpu
+```
+
+On Linux, use the corresponding portable commands:
+
+```bash
+uptime
+nproc
 ```
 
 These are signals, not proofs: a Lean process may be unrelated, and zero Lean

@@ -92,8 +92,8 @@ Codex reads `.agents/plugins/marketplace.json`. Its hook file,
 `plugins/lean-usage/codex-hooks.json`, resolves scripts through the installed
 plugin root and does not require a checkout-specific path.
 
-Requirements: macOS, Python 3 through `uv`, `jq`, Lean 4 with Lake, and
-`lake exe cache` for mathlib projects.
+Requirements: macOS or Linux, Python 3 through `uv`, `jq`, Lean 4 with Lake,
+and `lake exe cache` for mathlib projects.
 
 ## Tests
 

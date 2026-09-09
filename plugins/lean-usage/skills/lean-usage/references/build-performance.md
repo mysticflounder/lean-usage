@@ -130,7 +130,10 @@ Dependencies must already be built, and no same-project build may run concurrent
 
 ```bash
 cd <lake-root>
+# macOS:
 /usr/bin/time -l lake env lean -Dprofiler=true path/to/File.lean
+# Linux (GNU time; install it if needed):
+/usr/bin/time -v lake env lean -Dprofiler=true path/to/File.lean
 ```
 
 Alternatively, scope `set_option profiler true` in source while investigating and
