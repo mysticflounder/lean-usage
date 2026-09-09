@@ -1,0 +1,32 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/opt/homebrew/bin/python3 \"/Users/adam/projects/lean-usage/plugins/lean-usage/hooks/sync-lake-build.py\"",
+            "timeout_sec": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/opt/homebrew/bin/python3 \"/Users/adam/projects/lean-usage/plugins/lean-usage/hooks/lean-direct-warn.py\"",
+            "timeout_sec": 5
+          },
+          {
+            "type": "command",
+            "command": "/opt/homebrew/bin/python3 \"/Users/adam/projects/lean-usage/plugins/lean-usage/hooks/mathlib-cache-check.py\"",
+            "timeout_sec": 5
+          }
+        ]
+      }
+    ]
+  }
+}

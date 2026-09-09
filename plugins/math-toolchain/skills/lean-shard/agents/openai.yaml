@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lean Sharding"
+  short_description: "Split large Lean files into helper shards"
+  default_prompt: "Use $lean-shard to plan or apply a safe split of a large Lean source file."

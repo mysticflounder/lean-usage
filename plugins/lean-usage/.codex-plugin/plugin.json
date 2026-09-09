@@ -1,0 +1,23 @@
+{
+  "name": "lean-usage",
+  "version": "0.1.58",
+  "description": "House governance for Lean 4: lake-build, project theorem reuse, proof promotion and trust, aggregate tractability, and proof-blueprint publication gates.",
+  "skills": "./skills/",
+  "hooks": "./codex-hooks.json",
+  "author": {
+    "name": "Adam McKenna",
+    "email": "adam@mysticflounder.ai"
+  },
+  "interface": {
+    "displayName": "Lean Usage",
+    "shortDescription": "Lean builds, proof discipline, and proof-blueprint",
+    "longDescription": "House governance for Lean 4 and Lake: the global lake-build wrapper, project-indexed theorem reuse, sorry/axiom/native/external-evidence promotion policy, aggregate tractability, generated-proof performance, and proof-blueprint publication gates. Pair it with the generic Lean skill for tactics and proof-state work.",
+    "developerName": "Adam McKenna",
+    "category": "Coding",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Shell"
+    ]
+  }
+}

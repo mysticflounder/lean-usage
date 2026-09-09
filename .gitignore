@@ -1,0 +1,9 @@
+# Python bytecode from the hook and wrapper tests
+__pycache__/
+*.pyc
+
+# nthdegree memory store — local-only; must not be published
+.nthdegree/
+
+# machine-local agent run log; the .agent-smith/*.md files stay tracked if added
+.agent-smith/agent-calls.jsonl

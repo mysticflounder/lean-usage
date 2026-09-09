@@ -1,0 +1,9 @@
+{
+  "name": "math-toolchain",
+  "version": "0.2.80",
+  "description": "Subset of the math-toolchain plugin: the lean-shard skill (split a large Lean file into bounded shards plus a coordinator) and the drat-to-lean skill (CNF, CaDiCaL, LRAT, kernel-checked Lean 4 proof), as cited by the Lean build report.",
+  "author": {
+    "name": "Adam McKenna",
+    "email": "adam@mysticflounder.ai"
+  }
+}

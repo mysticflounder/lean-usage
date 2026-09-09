@@ -1,0 +1,39 @@
+{
+  "name": "lean-usage",
+  "description": "Lean 4 build governance: the lake-build wrapper with build and per-module telemetry, its guard hooks, the lean-usage skill, and the engineering report on Lean build throughput.",
+  "owner": {
+    "name": "Adam McKenna",
+    "email": "adam@mysticflounder.ai"
+  },
+  "interface": {
+    "displayName": "Lean Usage"
+  },
+  "plugins": [
+    {
+      "name": "lean-usage",
+      "description": "Lean 4 / Lake build conventions — the global lake-build wrapper (lockfile, memory cap, lean shim, mathlib cache prefetch, build and per-module timing logs) and the house governance skill. Warns on direct lake/lean invocations.",
+      "source": {
+        "source": "local",
+        "path": "./plugins/lean-usage"
+      },
+      "category": "Coding",
+      "policy": {
+        "installation": "INSTALLED_BY_DEFAULT",
+        "authentication": "ON_INSTALL"
+      }
+    },
+    {
+      "name": "math-toolchain",
+      "description": "lean-shard and drat-to-lean skills, as cited by the report. Subset of the private math-toolchain plugin.",
+      "source": {
+        "source": "local",
+        "path": "./plugins/math-toolchain"
+      },
+      "category": "Coding",
+      "policy": {
+        "installation": "INSTALLED_BY_DEFAULT",
+        "authentication": "ON_INSTALL"
+      }
+    }
+  ]
+}

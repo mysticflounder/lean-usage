@@ -1,0 +1,23 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "lean-usage",
+  "description": "Lean 4 build governance: the lake-build wrapper with build and per-module telemetry, its guard hooks, the lean-usage skill, and the engineering report on Lean build throughput.",
+  "owner": {
+    "name": "Adam McKenna",
+    "email": "adam@mysticflounder.ai"
+  },
+  "plugins": [
+    {
+      "name": "lean-usage",
+      "description": "Lean 4 / Lake build conventions — the global lake-build wrapper (lockfile, memory cap, lean shim, mathlib cache prefetch, build and per-module timing logs), warnings on direct lake/lean invocations, and the house governance skill for builds, theorem reuse, and proof promotion.",
+      "source": "./plugins/lean-usage",
+      "category": "development"
+    },
+    {
+      "name": "math-toolchain",
+      "description": "Two skills cited by the report: lean-shard (split a large Lean file into bounded shards plus a coordinator) and drat-to-lean (CNF, CaDiCaL, LRAT, kernel-checked Lean). Subset of the private math-toolchain plugin.",
+      "source": "./plugins/math-toolchain",
+      "category": "development"
+    }
+  ]
+}

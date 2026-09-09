@@ -1,0 +1,85 @@
+# lean-usage
+
+Lean 4 build governance for AI coding agents, packaged as a Claude Code and
+Codex plugin marketplace, together with the engineering report that documents
+what these conventions did for Lean build throughput across several
+formalization projects.
+
+**Report:** [Faster Lean verification with controlled memory and CPU](docs/reports/2026-09-07-lean-optimization-report.md)
+([PDF](docs/reports/2026-09-07-lean-optimization-report.pdf)) — Adam McKenna, 7 September 2026.
+The report cites the plugin sources in this repository, so its links resolve here.
+
+## What is in the box
+
+| Component | Path | Purpose |
+|---|---|---|
+| `lake-build` wrapper | `plugins/lean-usage/bin/lake-build` | Global Lake build entry point: walks up to the lakefile, serializes top-level builds with a stale-PID-aware lockfile, prefetches the mathlib binary cache, caps each `lean` worker's memory through a PATH shim, and records per-build and per-module timing to JSONL logs. |
+| Guard hooks | `plugins/lean-usage/hooks/` | Deploys the wrapper at session start, warns on direct `lake`/`lean` invocations, and blocks builds when the mathlib cache is missing or stale. |
+| Skills | `plugins/*/skills/` | See the table below. |
+| Report and data | `docs/reports/` | The report, its PDF rendering, the weekly chart, and the CSV files behind it. |
+
+## Skills
+
+### lean-usage
+
+| Skill | Command | Description |
+|-------|---------|-------------|
+| Lean Usage | `/lean-usage:lean-usage` | House governance for Lean 4 repositories: the `lake-build` workflow, project-indexed theorem reuse, proof obligations and tractability, axiom/native/external-evidence trust audits, promotion and publication. References cover build operations, build performance, generated proofs, proof discipline, code quality, vendoring, and the worker promotion contract. |
+| Proof Blueprint | `/lean-usage:proof-blueprint` | Drives the `proof-blueprint` CLI in projects with a `.blueprint.toml`: kernel-mined branch state, symbol search, spine mining, session anchors, axiom approval, audit and verify-publish gates. The CLI itself is a separate tool and is not included here. |
+
+### math-toolchain (subset)
+
+| Skill | Command | Description |
+|-------|---------|-------------|
+| Lean Shard | `/math-toolchain:lean-shard` | Split a large Lean source file into bounded helper shards plus a thin coordinator; wraps the `lean-shard` CLI (plan/apply/normalize, TOML policy, manifest, re-sharding). |
+| DRAT to Lean | `/math-toolchain:drat-to-lean` | Encode a claim to CNF, solve with CaDiCaL, trim to LRAT, and emit a kernel-checked Lean 4 proof. |
+
+The `lean-shard`, `drat-to-lean`, and `proof-blueprint` CLIs that these skills drive are not part of this repository.
+
+## Telemetry
+
+The wrapper writes two JSONL logs under `~/.local/state/lean-usage/`
+(override with `LEAN_USAGE_STATE_DIR`):
+
+- `build-stats.jsonl` — one row per invocation: timestamp, project, arguments, wall time, exit code, memory, recompile-activity count, build ID, interruption flag, log path.
+- `module-build-stats.jsonl` — one row per module compile, read from Lake's `Built <module> (Ns)` progress lines, joinable to the invocation through `build_id`.
+
+The report's compile-cost figures come from the second log. Whole-run wall
+times are not a cost measure, because a run's record does not say how much of
+the project it rebuilt; the report explains this in its timing section.
+
+## Install
+
+Claude Code:
+
+```
+/plugin marketplace add mysticflounder/lean-usage
+/plugin install lean-usage
+```
+
+Codex reads `.agents/plugins/marketplace.json`. Its hook file,
+`plugins/lean-usage/codex-hooks.json`, uses absolute paths and assumes the
+checkout at `~/projects/lean-usage`; edit it for another location.
+
+Requirements: macOS, Python 3 through `uv`, `jq`, Lean 4 with Lake, and
+`lake exe cache` for mathlib projects.
+
+## Tests
+
+```
+scripts/test.sh
+```
+
+This checks that every plugin's Claude and Codex manifests carry the same
+version, then runs the wrapper's lock, shim, and telemetry tests.
+
+## Provenance
+
+The plugin sources are a snapshot of the private `local-plugins` marketplace
+at commit `dc1a00a`. The report was written against that marketplace's commit
+`983f660`; line anchors in the report were re-pointed to the files in this
+repository.
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE).
