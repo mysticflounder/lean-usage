@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Adam McKenna
+# Released under GPL-3.0-or-later as described in the file LICENSE.
+# Author: Adam McKenna <adam@mysticflounder.ai>
+#
+# lean-direct-warn.py — warn when Lean or Lake bypasses the lake-build wrapper.
+#
+# Usage:
+#   Configured as a PreToolUse hook; reads hook event JSON from stdin.
 """lean-direct-warn.py — Warn when lake or lean is called directly instead of via lake-build.sh.
 Handles both Claude Code (flat payload) and Codex CLI (nested hook_event payload).
 """

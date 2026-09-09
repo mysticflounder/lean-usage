@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Adam McKenna
+# Released under GPL-3.0-or-later as described in the file LICENSE.
+# Author: Adam McKenna <adam@mysticflounder.ai>
+#
+# mathlib-cache-check.py — block Lean builds with a missing or stale mathlib cache.
+#
+# Usage:
+#   Configured as a PreToolUse hook; reads hook event JSON from stdin.
 """mathlib-cache-check.py — Block `lake build` / `lake env lean` / `lake-build` when
 the project depends on mathlib but `lake exe cache get` has not been run for it.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Copyright (c) 2026 Adam McKenna
-# Released under the Apache 2.0 license
+# Released under GPL-3.0-or-later as described in the file LICENSE.
 # Author: Adam McKenna <adam@mysticflounder.ai>
 #
 # check-manifest-versions.sh — release gate for manifest and Lean-worker drift.

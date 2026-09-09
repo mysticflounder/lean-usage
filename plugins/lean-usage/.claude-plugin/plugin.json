@@ -1,7 +1,7 @@
 {
   "name": "lean-usage",
-  "version": "0.1.58",
-  "description": "House governance for Lean 4: lake-build, project theorem reuse, proof promotion and trust, aggregate tractability, and proof-blueprint publication gates.",
+  "version": "0.1.59",
+  "description": "Lean 4 build and proof tooling: lake-build governance, proof-blueprint, lean-shard, and DRAT-to-Lean.",
   "author": {
     "name": "Adam McKenna",
     "email": "adam@mysticflounder.ai"

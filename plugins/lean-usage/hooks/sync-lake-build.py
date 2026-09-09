@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
-# Copyright (c) 2026 Adam McKenna. All rights reserved.
-# Released under Apache 2.0 license as described in the file LICENSE.
+# Copyright (c) 2026 Adam McKenna
+# Released under GPL-3.0-or-later as described in the file LICENSE.
 # Author: Adam McKenna <adam@mysticflounder.ai>
+#
+# sync-lake-build.py — install the active plugin's lake-build wrapper on PATH.
+#
+# Usage:
+#   Configured as a SessionStart hook; reads hook event JSON from stdin.
 """lean-usage SessionStart — keep ~/.local/bin/lake-build pointing at the
 plugin-shipped global build wrapper.
 

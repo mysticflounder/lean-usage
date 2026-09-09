@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Adam McKenna
+# Released under GPL-3.0-or-later as described in the file LICENSE.
+# Author: Adam McKenna <adam@mysticflounder.ai>
+#
+# inject_anchor.py — surface the active proof-blueprint anchor at session start.
+#
+# Usage:
+#   Configured as a SessionStart hook; reads hook event JSON from stdin.
 """SessionStart: inject `proof-blueprint anchor` output into the context.
 
 When the session's cwd sits inside a proof-blueprint project (a

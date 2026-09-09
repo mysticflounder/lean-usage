@@ -15,25 +15,18 @@ The report cites the plugin sources in this repository, so its links resolve her
 |---|---|---|
 | `lake-build` wrapper | `plugins/lean-usage/bin/lake-build` | Global Lake build entry point: walks up to the lakefile, serializes top-level builds with a stale-PID-aware lockfile, prefetches the mathlib binary cache, caps each `lean` worker's memory through a PATH shim, and records per-build and per-module timing to JSONL logs. |
 | Guard hooks | `plugins/lean-usage/hooks/` | Deploys the wrapper at session start, warns on direct `lake`/`lean` invocations, and blocks builds when the mathlib cache is missing or stale. |
-| Skills | `plugins/*/skills/` | See the table below. |
+| Skills | `plugins/lean-usage/skills/` | See the table below. |
 | Report and data | `docs/reports/` | The report, its PDF rendering, the weekly chart, and the CSV files behind it. |
 | Example wrapper | `examples/lake-build-example` | A portable, trimmed version of the wrapper for adoption elsewhere. See below. |
 
 ## Skills
 
-### lean-usage
-
 | Skill | Command | Description |
 |-------|---------|-------------|
 | Lean Usage | `/lean-usage:lean-usage` | House governance for Lean 4 repositories: the `lake-build` workflow, project-indexed theorem reuse, proof obligations and tractability, axiom/native/external-evidence trust audits, promotion and publication. References cover build operations, build performance, generated proofs, proof discipline, code quality, vendoring, and the worker promotion contract. |
 | Proof Blueprint | `/lean-usage:proof-blueprint` | Drives the `proof-blueprint` CLI in projects with a `.blueprint.toml`: kernel-mined branch state, symbol search, spine mining, session anchors, axiom approval, audit and verify-publish gates. The CLI itself is a separate tool and is not included here. |
-
-### math-toolchain (subset)
-
-| Skill | Command | Description |
-|-------|---------|-------------|
-| Lean Shard | `/math-toolchain:lean-shard` | Split a large Lean source file into bounded helper shards plus a thin coordinator; wraps the `lean-shard` CLI (plan/apply/normalize, TOML policy, manifest, re-sharding). |
-| DRAT to Lean | `/math-toolchain:drat-to-lean` | Encode a claim to CNF, solve with CaDiCaL, trim to LRAT, and emit a kernel-checked Lean 4 proof. |
+| Lean Shard | `/lean-usage:lean-shard` | Split a large Lean source file into bounded helper shards plus a thin coordinator; wraps the `lean-shard` CLI (plan/apply/normalize, TOML policy, manifest, re-sharding). |
+| DRAT to Lean | `/lean-usage:drat-to-lean` | Encode a claim to CNF, solve with CaDiCaL, trim to LRAT, and emit a kernel-checked Lean 4 proof. |
 
 The `lean-shard`, `drat-to-lean`, and `proof-blueprint` CLIs that these skills drive are not part of this repository.
 
@@ -104,4 +97,7 @@ repository.
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE).
+GPL-3.0-or-later. See [LICENSE](LICENSE).
+
+Contributions, including responsibly reviewed AI-assisted contributions, are
+welcome under the policy in [CONTRIBUTING.md](CONTRIBUTING.md).

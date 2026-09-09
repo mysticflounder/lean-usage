@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
-# Copyright (c) 2026 Adam McKenna. All rights reserved.
-# Released under Apache 2.0 license as described in the file LICENSE.
+# Copyright (c) 2026 Adam McKenna
+# Released under GPL-3.0-or-later as described in the file LICENSE.
 # Author: Adam McKenna <adam@mysticflounder.ai>
+#
+# test_lake_build_lock.py — test lake-build locking, shims, cache checks, and telemetry.
+#
+# Usage:
+#   uv run --no-project python plugins/lean-usage/scripts/test_lake_build_lock.py
 """Unit tests for lake-build's caller-aware PID lock."""
 
 import contextlib
@@ -224,7 +229,7 @@ class LakeBuildLockTests(unittest.TestCase):
             "calls = os.environ.get('FAKE_LAKE_CALLS')\n"
             "if calls:\n"
             "    with Path(calls).open('a', encoding='utf-8') as fh:\n"
-            "        fh.write(json.dumps(sys.argv[1:]) + '\\\\n')\n"
+            "        fh.write(json.dumps(sys.argv[1:]) + '\\n')\n"
             "lock = Path(os.environ['LOCKFILE'])\n"
             "metadata = json.loads(lock.read_text(encoding='utf-8').splitlines()[1])\n"
             "print('FAKE_LAKE_STDOUT_SENTINEL')\n"

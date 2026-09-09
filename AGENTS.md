@@ -45,7 +45,8 @@ or treat this repository as the publication copy.
 - Python runs through `uv` (`uv run --no-project python …`); no bare `python3`
   or `pip`.
 - Shell and Python sources carry the header block: copyright, "Released under
-  the Apache 2.0 license", author, purpose, `Usage:` lines.
+  GPL-3.0-or-later as described in the file LICENSE.", author, purpose, and
+  `Usage:` lines.
 - `docs/` is date-prefixed: `docs/<kind>/YYYY-MM-DD-slug.md`.
 - Commit only your own edits; `git pull --rebase --autostash` before pushing.
 - macOS only.

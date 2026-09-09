@@ -1,7 +1,6 @@
 ---
 name: lean-shard
-description: "Use to split a large Lean source file into bounded helper shards plus a thin coordinator. Wraps the lean-shard CLI: plan/apply/normalize, TOML policy, manifest format, re-sharding."
-when-to-use: "The user has a Lean source file that is too large (Lake/elan compile times, mathlib import bloat, generated proofs) and wants it split into multiple files behind a coordinator, OR wants to re-shard a file that was previously sharded."
+description: "Use when a Lean source file is too large because of compile time, import bloat, or generated proofs, or when a previously sharded file needs re-sharding. Splits it into bounded helper shards plus a thin coordinator using the lean-shard CLI: plan/apply/normalize, TOML policy, manifest format, and re-sharding."
 ---
 
 # lean-shard

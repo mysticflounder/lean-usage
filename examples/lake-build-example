@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2026 Adam McKenna
-# Released under the Apache 2.0 license as described in the file LICENSE.
+# Released under GPL-3.0-or-later as described in the file LICENSE.
 # Author: Adam McKenna <adam@mysticflounder.ai>
 #
 # lake-build-example — a portable, trimmed version of the lake-build wrapper in
