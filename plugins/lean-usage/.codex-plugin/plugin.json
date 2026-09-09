@@ -1,7 +1,7 @@
 {
   "name": "lean-usage",
-  "version": "0.1.59",
-  "description": "Lean 4 build and proof tooling: lake-build governance, proof-blueprint, lean-shard, and DRAT-to-Lean.",
+  "version": "0.1.60",
+  "description": "Lean 4 build and proof tooling: lake-build governance, lean-shard, and DRAT-to-Lean.",
   "skills": "./skills/",
   "hooks": "./codex-hooks.json",
   "author": {
@@ -11,7 +11,7 @@
   "interface": {
     "displayName": "Lean Usage",
     "shortDescription": "Lean builds, proof discipline, and proof tooling",
-    "longDescription": "House governance for Lean 4 and Lake plus proof-blueprint publication gates, lean-shard source splitting, and DRAT-to-Lean certificate generation. Pair it with the generic Lean skill for tactics and proof-state work.",
+    "longDescription": "House governance for Lean 4 and Lake plus lean-shard source splitting and DRAT-to-Lean certificate generation. Pair it with the generic Lean skill for tactics and proof-state work.",
     "developerName": "Adam McKenna",
     "category": "Coding",
     "capabilities": [

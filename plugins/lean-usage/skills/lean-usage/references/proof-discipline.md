@@ -188,8 +188,8 @@ editing or reporting. Distinguish:
 - a fresh kernel call graph and axiom closure;
 - a rendered status document, which is only a snapshot of the above.
 
-Use the sibling [proof-blueprint skill](../../proof-blueprint/SKILL.md) for exact
-commands and publication gates.
+Use the project's own proof-index and publication-gate documentation for exact
+commands and version-specific behavior.
 
 ## Theorem-bank and archive evidence
 
@@ -319,8 +319,8 @@ In proof-blueprint projects the explicit rule's machine-checked home is
 `.blueprint.toml` `[trust]` (`native_axioms`, `unsafe`, `partial`,
 `implemented_by`, `extern`) plus `[computations]` evidence manifests, enforced at
 promotion by `audit`/`verify-publish` under the computational-hygiene extension
-(2026-08-30). See the sibling proof-blueprint skill's computational-evidence
-section for the contract and the deployed-binary version-skew caveat.
+(2026-08-30). See the project's computational-evidence documentation for the
+contract and the deployed-tool version-skew caveat.
 
 ## `native_decide`
 

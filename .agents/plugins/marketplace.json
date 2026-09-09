@@ -1,6 +1,6 @@
 {
   "name": "lean-usage",
-  "description": "Lean 4 build governance and proof tooling: lake-build telemetry and guards, proof-blueprint, lean-shard, and DRAT-to-Lean.",
+  "description": "Lean 4 build governance and proof tooling: lake-build telemetry and guards, lean-shard, and DRAT-to-Lean.",
   "owner": {
     "name": "Adam McKenna",
     "email": "adam@mysticflounder.ai"
@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "lean-usage",
-      "description": "Lean 4 / Lake build conventions and proof tooling — lake-build telemetry and guards, house governance, proof-blueprint, lean-shard, and DRAT-to-Lean.",
+      "description": "Lean 4 / Lake build conventions and proof tooling — lake-build telemetry and guards, house governance, lean-shard, and DRAT-to-Lean.",
       "source": {
         "source": "local",
         "path": "./plugins/lean-usage"

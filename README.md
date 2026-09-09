@@ -19,16 +19,32 @@ The report cites the plugin sources in this repository, so its links resolve her
 | Report and data | `docs/reports/` | The report, its PDF rendering, the weekly chart, and the CSV files behind it. |
 | Example wrapper | `examples/lake-build-example` | A portable, trimmed version of the wrapper for adoption elsewhere. See below. |
 
+## Plugin hooks
+
+Hooks run automatically at host lifecycle events; they are separate from the
+model-invoked skills.
+
+| Host/event | Hook behavior |
+|---|---|
+| Claude `SessionStart` | Keeps `~/.local/bin/lake-build` pointed at the active wrapper via [`sync-lake-build.py`](plugins/lean-usage/hooks/sync-lake-build.py). |
+| Claude `PreToolUse` (Bash) | Warns on direct `lake`/`lean` calls via [`lean-direct-warn.py`](plugins/lean-usage/hooks/lean-direct-warn.py) and denies recognized mathlib builds with a missing or stale cache via [`mathlib-cache-check.py`](plugins/lean-usage/hooks/mathlib-cache-check.py). |
+| Codex `SessionStart` | Synchronizes the `lake-build` wrapper. |
+| Codex `PreToolUse` (Bash) | Applies the same direct-build warning and mathlib-cache guard. |
+
+Claude registers these in [`hooks/hooks.json`](plugins/lean-usage/hooks/hooks.json);
+Codex registers them in [`codex-hooks.json`](plugins/lean-usage/codex-hooks.json).
+The hook commands use `uv` and the host-provided plugin root, so they do not
+depend on Homebrew or a fixed checkout path.
+
 ## Skills
 
 | Skill | Command | Description |
 |-------|---------|-------------|
 | Lean Usage | `/lean-usage:lean-usage` | House governance for Lean 4 repositories: the `lake-build` workflow, project-indexed theorem reuse, proof obligations and tractability, axiom/native/external-evidence trust audits, promotion and publication. References cover build operations, build performance, generated proofs, proof discipline, code quality, vendoring, and the worker promotion contract. |
-| Proof Blueprint | `/lean-usage:proof-blueprint` | Drives the `proof-blueprint` CLI in projects with a `.blueprint.toml`: kernel-mined branch state, symbol search, spine mining, session anchors, axiom approval, audit and verify-publish gates. The CLI itself is a separate tool and is not included here. |
 | Lean Shard | `/lean-usage:lean-shard` | Split a large Lean source file into bounded helper shards plus a thin coordinator; wraps the `lean-shard` CLI (plan/apply/normalize, TOML policy, manifest, re-sharding). |
 | DRAT to Lean | `/lean-usage:drat-to-lean` | Encode a claim to CNF, solve with CaDiCaL, trim to LRAT, and emit a kernel-checked Lean 4 proof. |
 
-The `lean-shard`, `drat-to-lean`, and `proof-blueprint` CLIs that these skills drive are not part of this repository.
+The `lean-shard` and `drat-to-lean` CLIs that these skills drive are not part of this repository.
 
 ## Telemetry
 
@@ -46,8 +62,8 @@ the project it rebuilt; the report explains this in its timing section.
 
 `examples/lake-build-example` is a self-contained Python script, based on the
 production wrapper, that keeps the parts behind the report's telemetry and
-drops the house-specific ones (proof-blueprint resync, spine archives, session
-identity, hook deployment). It needs only Python 3 and a Lean toolchain on
+drops the house-specific telemetry, spine archives, session identity, and hook
+deployment. It needs only Python 3 and a Lean toolchain on
 `PATH`. From anywhere inside a Lake project:
 
 ```
@@ -73,8 +89,8 @@ Claude Code:
 ```
 
 Codex reads `.agents/plugins/marketplace.json`. Its hook file,
-`plugins/lean-usage/codex-hooks.json`, uses absolute paths and assumes the
-checkout at `~/projects/lean-usage`; edit it for another location.
+`plugins/lean-usage/codex-hooks.json`, resolves scripts through the installed
+plugin root and does not require a checkout-specific path.
 
 Requirements: macOS, Python 3 through `uv`, `jq`, Lean 4 with Lake, and
 `lake exe cache` for mathlib projects.

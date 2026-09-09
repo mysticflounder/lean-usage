@@ -254,8 +254,8 @@ Read [build-performance.md](references/build-performance.md) when a build is slo
   visible to proof mining and closure audits.
 - If validation is gated or incomplete, report exactly what was not run.
 
-For proof-blueprint command semantics, use the sibling
-[proof-blueprint skill](../proof-blueprint/SKILL.md).
+For project-specific publication or proof-index command semantics, follow the
+tooling and documentation shipped by that project.
 
 ## Code and repository hygiene
 

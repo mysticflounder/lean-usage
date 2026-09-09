@@ -5,14 +5,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/opt/homebrew/bin/python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/sync-lake-build.py\"",
+            "command": "uv run --no-project python \"${CLAUDE_PLUGIN_ROOT}/hooks/sync-lake-build.py\"",
             "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "/opt/homebrew/bin/python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/inject_anchor.py\"",
-            "timeout": 8,
-            "statusMessage": "proof-blueprint: anchor"
           }
         ]
       }
@@ -23,12 +17,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/opt/homebrew/bin/python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/lean-direct-warn.py\"",
+            "command": "uv run --no-project python \"${CLAUDE_PLUGIN_ROOT}/hooks/lean-direct-warn.py\"",
             "timeout": 5
           },
           {
             "type": "command",
-            "command": "/opt/homebrew/bin/python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/mathlib-cache-check.py\"",
+            "command": "uv run --no-project python \"${CLAUDE_PLUGIN_ROOT}/hooks/mathlib-cache-check.py\"",
             "timeout": 5
           }
         ]
