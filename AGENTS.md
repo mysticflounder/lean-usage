@@ -49,4 +49,5 @@ or treat this repository as the publication copy.
   `Usage:` lines.
 - `docs/` is date-prefixed: `docs/<kind>/YYYY-MM-DD-slug.md`.
 - Commit only your own edits; `git pull --rebase --autostash` before pushing.
-- macOS and Linux only.
+- macOS and Linux are supported. Windows support is intended but untested;
+  treat Windows-specific problems as bugs and direct users to the issue tracker.

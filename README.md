@@ -92,8 +92,12 @@ Codex reads `.agents/plugins/marketplace.json`. Its hook file,
 `plugins/lean-usage/codex-hooks.json`, resolves scripts through the installed
 plugin root and does not require a checkout-specific path.
 
-Requirements: macOS or Linux, Python 3 through `uv`, `jq`, Lean 4 with Lake,
-and `lake exe cache` for mathlib projects.
+Supported platforms are macOS and Linux. Windows support is intended, but has
+not yet been tested; please [open an issue](https://github.com/mysticflounder/lean-usage/issues)
+if you encounter a Windows-specific problem.
+
+Requirements: Python 3 through `uv`, `jq`, Lean 4 with Lake, and
+`lake exe cache` for mathlib projects.
 
 ## Tests
 
