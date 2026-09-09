@@ -1,0 +1,226 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="t d">
+<title id="t">Weekly Lean source size and weekly single-module compile wall time, four projects, May–September 2026</title>
+<desc id="d">Two rows of four small charts, one column per project. The top row shows committed Lean source in decimal megabytes on a logarithmic axis, sampled weekly from Git. The bottom row shows, per week from July 28, the median (dot) and 90th percentile (top of the translucent bar) of the wall time of each single module compile recorded in the per-module log, on a logarithmic seconds axis. Hollow dots mark weeks with fewer than ten compiles.</desc>
+<rect width="1200" height="820" fill="#fcfcfb"/>
+<g font-family="system-ui, -apple-system, Segoe UI, sans-serif" fill="#0b0b0b">
+<text x="92" y="46" font-size="26" font-weight="700">Source size and module compile cost, week by week</text>
+<text x="92" y="74" font-size="16" fill="#52514e">Weekly Git snapshots and lake-build wrapper records · May–September 2026 · one column per project · logarithmic axes</text>
+<line x1="92" y1="104" x2="116" y2="104" stroke="#2a78d6" stroke-width="2"/><text x="124" y="109" font-size="14" fill="#52514e">committed source</text>
+<circle cx="263" cy="104" r="4.5" fill="#2a78d6"/><rect x="261" y="90" width="4" height="10" rx="2" fill="#2a78d6" opacity="0.35"/><text x="275" y="109" font-size="14" fill="#52514e">single-module compile: median (dot) and 90th percentile (bar top)</text>
+<circle cx="733" cy="104" r="4.5" fill="#fcfcfb" stroke="#52514e" stroke-width="2"/><text x="745" y="109" font-size="14" fill="#52514e">fewer than 10 compiles that week</text>
+<text x="92" y="174" font-size="15" fill="#52514e">Committed .lean source, decimal MB</text>
+<text x="92.0" y="146" font-size="16" font-weight="600">erdos-97-96-formalization</text>
+<line x1="92.0" y1="410.0" x2="342.0" y2="410.0" stroke="#e1e0d9"/>
+<text x="84.0" y="414.0" font-size="13" text-anchor="end" fill="#898781" font-variant-numeric="tabular-nums">0.1</text>
+<line x1="92.0" y1="367.7" x2="342.0" y2="367.7" stroke="#e1e0d9"/>
+<text x="84.0" y="371.7" font-size="13" text-anchor="end" fill="#898781" font-variant-numeric="tabular-nums">1</text>
+<line x1="92.0" y1="325.4" x2="342.0" y2="325.4" stroke="#e1e0d9"/>
+<text x="84.0" y="329.4" font-size="13" text-anchor="end" fill="#898781" font-variant-numeric="tabular-nums">10</text>
+<line x1="92.0" y1="283.1" x2="342.0" y2="283.1" stroke="#e1e0d9"/>
+<text x="84.0" y="287.1" font-size="13" text-anchor="end" fill="#898781" font-variant-numeric="tabular-nums">100</text>
+<line x1="92.0" y1="240.8" x2="342.0" y2="240.8" stroke="#e1e0d9"/>
+<text x="84.0" y="244.8" font-size="13" text-anchor="end" fill="#898781" font-variant-numeric="tabular-nums">1,000</text>
+<line x1="92.0" y1="198.5" x2="342.0" y2="198.5" stroke="#e1e0d9"/>
+<text x="84.0" y="202.5" font-size="13" text-anchor="end" fill="#898781" font-variant-numeric="tabular-nums">10,000</text>
+<line x1="92.0" y1="410" x2="342.0" y2="410" stroke="#c3c2b7"/>
+<line x1="92.0" y1="410" x2="92.0" y2="415" stroke="#c3c2b7"/>
+<text x="92.0" y="430" font-size="13" text-anchor="middle" fill="#898781">May</text>
+<line x1="152.1" y1="410" x2="152.1" y2="415" stroke="#c3c2b7"/>
+<text x="152.1" y="430" font-size="13" text-anchor="middle" fill="#898781">Jun</text>
+<line x1="210.2" y1="410" x2="210.2" y2="415" stroke="#c3c2b7"/>
+<text x="210.2" y="430" font-size="13" text-anchor="middle" fill="#898781">Jul</text>
+<line x1="270.3" y1="410" x2="270.3" y2="415" stroke="#c3c2b7"/>
+<text x="270.3" y="430" font-size="13" text-anchor="middle" fill="#898781">Aug</text>
+<line x1="330.4" y1="410" x2="330.4" y2="415" stroke="#c3c2b7"/>
+<text x="330.4" y="430" font-size="13" text-anchor="middle" fill="#898781">Sep</text>
+<path d="M187.0,349.0 L200.5,349.0 L214.1,349.0 L227.7,242.2 L241.2,242.1 L254.8,242.1 L268.4,241.8 L281.9,241.8 L295.5,241.7 L309.1,241.5 L322.6,241.5 L336.2,241.4 L342.0,241.3" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="342.0" cy="241.3" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="334.0" y="231.3" font-size="13" text-anchor="end" fill="#52514e" paint-order="stroke" stroke="#fcfcfb" stroke-width="4">969 MB</text>
+<text x="370.0" y="146" font-size="16" font-weight="600">esgk-on3</text>
+<line x1="370.0" y1="410.0" x2="620.0" y2="410.0" stroke="#e1e0d9"/>
+<line x1="370.0" y1="367.7" x2="620.0" y2="367.7" stroke="#e1e0d9"/>
+<line x1="370.0" y1="325.4" x2="620.0" y2="325.4" stroke="#e1e0d9"/>
+<line x1="370.0" y1="283.1" x2="620.0" y2="283.1" stroke="#e1e0d9"/>
+<line x1="370.0" y1="240.8" x2="620.0" y2="240.8" stroke="#e1e0d9"/>
+<line x1="370.0" y1="198.5" x2="620.0" y2="198.5" stroke="#e1e0d9"/>
+<line x1="370.0" y1="410" x2="620.0" y2="410" stroke="#c3c2b7"/>
+<line x1="370.0" y1="410" x2="370.0" y2="415" stroke="#c3c2b7"/>
+<text x="370.0" y="430" font-size="13" text-anchor="middle" fill="#898781">May</text>
+<line x1="430.1" y1="410" x2="430.1" y2="415" stroke="#c3c2b7"/>
+<text x="430.1" y="430" font-size="13" text-anchor="middle" fill="#898781">Jun</text>
+<line x1="488.2" y1="410" x2="488.2" y2="415" stroke="#c3c2b7"/>
+<text x="488.2" y="430" font-size="13" text-anchor="middle" fill="#898781">Jul</text>
+<line x1="548.3" y1="410" x2="548.3" y2="415" stroke="#c3c2b7"/>
+<text x="548.3" y="430" font-size="13" text-anchor="middle" fill="#898781">Aug</text>
+<line x1="608.4" y1="410" x2="608.4" y2="415" stroke="#c3c2b7"/>
+<text x="608.4" y="430" font-size="13" text-anchor="middle" fill="#898781">Sep</text>
+<path d="M424.3,404.8 L437.8,404.8 L451.4,404.8 L465.0,346.3 L478.5,343.6 L492.1,343.6 L505.7,343.5 L519.2,342.4 L532.8,342.4 L546.4,342.4 L559.9,342.4 L573.5,341.6 L587.1,341.6 L600.6,335.8 L614.2,331.0 L620.0,331.0" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="620.0" cy="331.0" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="612.0" y="321.0" font-size="13" text-anchor="end" fill="#52514e" paint-order="stroke" stroke="#fcfcfb" stroke-width="4">7 MB</text>
+<text x="648.0" y="146" font-size="16" font-weight="600">the-missing-pair</text>
+<line x1="648.0" y1="410.0" x2="898.0" y2="410.0" stroke="#e1e0d9"/>
+<line x1="648.0" y1="367.7" x2="898.0" y2="367.7" stroke="#e1e0d9"/>
+<line x1="648.0" y1="325.4" x2="898.0" y2="325.4" stroke="#e1e0d9"/>
+<line x1="648.0" y1="283.1" x2="898.0" y2="283.1" stroke="#e1e0d9"/>
+<line x1="648.0" y1="240.8" x2="898.0" y2="240.8" stroke="#e1e0d9"/>
+<line x1="648.0" y1="198.5" x2="898.0" y2="198.5" stroke="#e1e0d9"/>
+<line x1="648.0" y1="410" x2="898.0" y2="410" stroke="#c3c2b7"/>
+<line x1="648.0" y1="410" x2="648.0" y2="415" stroke="#c3c2b7"/>
+<text x="648.0" y="430" font-size="13" text-anchor="middle" fill="#898781">May</text>
+<line x1="708.1" y1="410" x2="708.1" y2="415" stroke="#c3c2b7"/>
+<text x="708.1" y="430" font-size="13" text-anchor="middle" fill="#898781">Jun</text>
+<line x1="766.2" y1="410" x2="766.2" y2="415" stroke="#c3c2b7"/>
+<text x="766.2" y="430" font-size="13" text-anchor="middle" fill="#898781">Jul</text>
+<line x1="826.3" y1="410" x2="826.3" y2="415" stroke="#c3c2b7"/>
+<text x="826.3" y="430" font-size="13" text-anchor="middle" fill="#898781">Aug</text>
+<line x1="886.4" y1="410" x2="886.4" y2="415" stroke="#c3c2b7"/>
+<text x="886.4" y="430" font-size="13" text-anchor="middle" fill="#898781">Sep</text>
+<path d="M648.0,261.3 L661.6,233.1 L675.1,232.9 L688.7,232.9 L702.3,232.9 L715.8,196.8 L729.4,196.8 L743.0,196.8 L756.5,196.8 L770.1,196.8 L783.7,196.8 L797.2,196.8 L810.8,196.8 L824.4,196.8 L837.9,221.5 L851.5,221.5 L865.1,221.5 L878.6,221.5 L892.2,221.5 L898.0,221.5" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="898.0" cy="221.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="890.0" y="241.5" font-size="13" text-anchor="end" fill="#52514e" paint-order="stroke" stroke="#fcfcfb" stroke-width="4">2,857 MB</text>
+<text x="926.0" y="146" font-size="16" font-weight="600">schur-numbers</text>
+<line x1="926.0" y1="410.0" x2="1176.0" y2="410.0" stroke="#e1e0d9"/>
+<line x1="926.0" y1="367.7" x2="1176.0" y2="367.7" stroke="#e1e0d9"/>
+<line x1="926.0" y1="325.4" x2="1176.0" y2="325.4" stroke="#e1e0d9"/>
+<line x1="926.0" y1="283.1" x2="1176.0" y2="283.1" stroke="#e1e0d9"/>
+<line x1="926.0" y1="240.8" x2="1176.0" y2="240.8" stroke="#e1e0d9"/>
+<line x1="926.0" y1="198.5" x2="1176.0" y2="198.5" stroke="#e1e0d9"/>
+<line x1="926.0" y1="410" x2="1176.0" y2="410" stroke="#c3c2b7"/>
+<line x1="926.0" y1="410" x2="926.0" y2="415" stroke="#c3c2b7"/>
+<text x="926.0" y="430" font-size="13" text-anchor="middle" fill="#898781">May</text>
+<line x1="986.1" y1="410" x2="986.1" y2="415" stroke="#c3c2b7"/>
+<text x="986.1" y="430" font-size="13" text-anchor="middle" fill="#898781">Jun</text>
+<line x1="1044.2" y1="410" x2="1044.2" y2="415" stroke="#c3c2b7"/>
+<text x="1044.2" y="430" font-size="13" text-anchor="middle" fill="#898781">Jul</text>
+<line x1="1104.3" y1="410" x2="1104.3" y2="415" stroke="#c3c2b7"/>
+<text x="1104.3" y="430" font-size="13" text-anchor="middle" fill="#898781">Aug</text>
+<line x1="1164.4" y1="410" x2="1164.4" y2="415" stroke="#c3c2b7"/>
+<text x="1164.4" y="430" font-size="13" text-anchor="middle" fill="#898781">Sep</text>
+<path d="M926.0,327.4 L939.6,320.8 L953.1,318.3 L966.7,318.3 L980.3,318.3 L993.8,317.7 L1007.4,317.7 L1021.0,317.7 L1034.5,317.7 L1048.1,317.7 L1061.7,317.7 L1075.2,317.7 L1088.8,317.7 L1102.4,317.6 L1115.9,317.6 L1129.5,317.6 L1143.1,317.6 L1156.6,317.2 L1170.2,317.1 L1176.0,317.1" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1176.0" cy="317.1" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="1168.0" y="307.1" font-size="13" text-anchor="end" fill="#52514e" paint-order="stroke" stroke="#fcfcfb" stroke-width="4">16 MB</text>
+<text x="92" y="474" font-size="15" fill="#52514e">Wall time of one module compile, seconds (per-module log from July 28)</text>
+<line x1="92.0" y1="710.0" x2="342.0" y2="710.0" stroke="#e1e0d9"/>
+<text x="84.0" y="714.0" font-size="13" text-anchor="end" fill="#898781" font-variant-numeric="tabular-nums">1</text>
+<line x1="92.0" y1="666.0" x2="342.0" y2="666.0" stroke="#e1e0d9"/>
+<text x="84.0" y="670.0" font-size="13" text-anchor="end" fill="#898781" font-variant-numeric="tabular-nums">10</text>
+<line x1="92.0" y1="622.0" x2="342.0" y2="622.0" stroke="#e1e0d9"/>
+<text x="84.0" y="626.0" font-size="13" text-anchor="end" fill="#898781" font-variant-numeric="tabular-nums">100</text>
+<line x1="92.0" y1="578.0" x2="342.0" y2="578.0" stroke="#e1e0d9"/>
+<text x="84.0" y="582.0" font-size="13" text-anchor="end" fill="#898781" font-variant-numeric="tabular-nums">1,000</text>
+<line x1="92.0" y1="534.0" x2="342.0" y2="534.0" stroke="#e1e0d9"/>
+<text x="84.0" y="538.0" font-size="13" text-anchor="end" fill="#898781" font-variant-numeric="tabular-nums">10,000</text>
+<line x1="92.0" y1="490.0" x2="342.0" y2="490.0" stroke="#e1e0d9"/>
+<text x="84.0" y="494.0" font-size="13" text-anchor="end" fill="#898781" font-variant-numeric="tabular-nums">100,000</text>
+<line x1="92.0" y1="710" x2="342.0" y2="710" stroke="#c3c2b7"/>
+<line x1="92.0" y1="710" x2="92.0" y2="715" stroke="#c3c2b7"/>
+<text x="92.0" y="730" font-size="13" text-anchor="middle" fill="#898781">May</text>
+<line x1="152.1" y1="710" x2="152.1" y2="715" stroke="#c3c2b7"/>
+<text x="152.1" y="730" font-size="13" text-anchor="middle" fill="#898781">Jun</text>
+<line x1="210.2" y1="710" x2="210.2" y2="715" stroke="#c3c2b7"/>
+<text x="210.2" y="730" font-size="13" text-anchor="middle" fill="#898781">Jul</text>
+<line x1="270.3" y1="710" x2="270.3" y2="715" stroke="#c3c2b7"/>
+<text x="270.3" y="730" font-size="13" text-anchor="middle" fill="#898781">Aug</text>
+<line x1="330.4" y1="710" x2="330.4" y2="715" stroke="#c3c2b7"/>
+<text x="330.4" y="730" font-size="13" text-anchor="middle" fill="#898781">Sep</text>
+<line x1="262.5" y1="490" x2="262.5" y2="710" stroke="#c3c2b7"/>
+<text x="257.5" y="504" font-size="12" text-anchor="end" fill="#898781">module log begins Jul 28</text>
+<rect x="266.4" y="630.5" width="4" height="24.2" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="268.4" cy="654.8" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="279.9" y="629.7" width="4" height="23.1" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="281.9" cy="652.8" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="293.5" y="630.2" width="4" height="26.8" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="295.5" cy="657.0" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="307.1" y="634.9" width="4" height="33.4" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="309.1" cy="668.2" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="320.6" y="648.5" width="4" height="27.0" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="322.6" cy="675.4" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="334.2" y="607.8" width="4" height="48.0" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="336.2" cy="655.9" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="340.0" y="606.9" width="4" height="44.0" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="342.0" cy="650.9" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="333.0" y="610.9" font-size="13" text-anchor="end" fill="#52514e" paint-order="stroke" stroke="#fcfcfb" stroke-width="4">p90 220 s</text>
+<line x1="370.0" y1="710.0" x2="620.0" y2="710.0" stroke="#e1e0d9"/>
+<line x1="370.0" y1="666.0" x2="620.0" y2="666.0" stroke="#e1e0d9"/>
+<line x1="370.0" y1="622.0" x2="620.0" y2="622.0" stroke="#e1e0d9"/>
+<line x1="370.0" y1="578.0" x2="620.0" y2="578.0" stroke="#e1e0d9"/>
+<line x1="370.0" y1="534.0" x2="620.0" y2="534.0" stroke="#e1e0d9"/>
+<line x1="370.0" y1="490.0" x2="620.0" y2="490.0" stroke="#e1e0d9"/>
+<line x1="370.0" y1="710" x2="620.0" y2="710" stroke="#c3c2b7"/>
+<line x1="370.0" y1="710" x2="370.0" y2="715" stroke="#c3c2b7"/>
+<text x="370.0" y="730" font-size="13" text-anchor="middle" fill="#898781">May</text>
+<line x1="430.1" y1="710" x2="430.1" y2="715" stroke="#c3c2b7"/>
+<text x="430.1" y="730" font-size="13" text-anchor="middle" fill="#898781">Jun</text>
+<line x1="488.2" y1="710" x2="488.2" y2="715" stroke="#c3c2b7"/>
+<text x="488.2" y="730" font-size="13" text-anchor="middle" fill="#898781">Jul</text>
+<line x1="548.3" y1="710" x2="548.3" y2="715" stroke="#c3c2b7"/>
+<text x="548.3" y="730" font-size="13" text-anchor="middle" fill="#898781">Aug</text>
+<line x1="608.4" y1="710" x2="608.4" y2="715" stroke="#c3c2b7"/>
+<text x="608.4" y="730" font-size="13" text-anchor="middle" fill="#898781">Sep</text>
+<line x1="540.5" y1="490" x2="540.5" y2="710" stroke="#c3c2b7"/>
+<rect x="557.9" y="649.3" width="4" height="27.8" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="559.9" cy="677.1" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="571.5" y="649.3" width="4" height="31.2" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="573.5" cy="680.4" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="598.6" y="661.0" width="4" height="21.6" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="600.6" cy="682.6" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="612.2" y="667.0" width="4" height="15.1" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="614.2" cy="682.1" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="550.9" y="653.3" font-size="13" text-anchor="end" fill="#52514e" paint-order="stroke" stroke="#fcfcfb" stroke-width="4">p90 24 s</text>
+<line x1="648.0" y1="710.0" x2="898.0" y2="710.0" stroke="#e1e0d9"/>
+<line x1="648.0" y1="666.0" x2="898.0" y2="666.0" stroke="#e1e0d9"/>
+<line x1="648.0" y1="622.0" x2="898.0" y2="622.0" stroke="#e1e0d9"/>
+<line x1="648.0" y1="578.0" x2="898.0" y2="578.0" stroke="#e1e0d9"/>
+<line x1="648.0" y1="534.0" x2="898.0" y2="534.0" stroke="#e1e0d9"/>
+<line x1="648.0" y1="490.0" x2="898.0" y2="490.0" stroke="#e1e0d9"/>
+<line x1="648.0" y1="710" x2="898.0" y2="710" stroke="#c3c2b7"/>
+<line x1="648.0" y1="710" x2="648.0" y2="715" stroke="#c3c2b7"/>
+<text x="648.0" y="730" font-size="13" text-anchor="middle" fill="#898781">May</text>
+<line x1="708.1" y1="710" x2="708.1" y2="715" stroke="#c3c2b7"/>
+<text x="708.1" y="730" font-size="13" text-anchor="middle" fill="#898781">Jun</text>
+<line x1="766.2" y1="710" x2="766.2" y2="715" stroke="#c3c2b7"/>
+<text x="766.2" y="730" font-size="13" text-anchor="middle" fill="#898781">Jul</text>
+<line x1="826.3" y1="710" x2="826.3" y2="715" stroke="#c3c2b7"/>
+<text x="826.3" y="730" font-size="13" text-anchor="middle" fill="#898781">Aug</text>
+<line x1="886.4" y1="710" x2="886.4" y2="715" stroke="#c3c2b7"/>
+<text x="886.4" y="730" font-size="13" text-anchor="middle" fill="#898781">Sep</text>
+<line x1="818.5" y1="490" x2="818.5" y2="710" stroke="#c3c2b7"/>
+<rect x="822.4" y="644.4" width="4" height="0.0" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="824.4" cy="644.4" r="4" fill="#fcfcfb" stroke="#2a78d6" stroke-width="2"/>
+<rect x="835.9" y="595.7" width="4" height="53.5" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="837.9" cy="649.3" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="849.5" y="657.0" width="4" height="16.6" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="851.5" cy="673.7" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="863.1" y="658.3" width="4" height="32.8" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="865.1" cy="691.0" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="890.2" y="657.0" width="4" height="0.0" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="892.2" cy="657.0" r="4" fill="#fcfcfb" stroke="#2a78d6" stroke-width="2"/>
+<text x="828.9" y="599.7" font-size="13" text-anchor="end" fill="#52514e" paint-order="stroke" stroke="#fcfcfb" stroke-width="4">p90 395 s</text>
+<line x1="926.0" y1="710.0" x2="1176.0" y2="710.0" stroke="#e1e0d9"/>
+<line x1="926.0" y1="666.0" x2="1176.0" y2="666.0" stroke="#e1e0d9"/>
+<line x1="926.0" y1="622.0" x2="1176.0" y2="622.0" stroke="#e1e0d9"/>
+<line x1="926.0" y1="578.0" x2="1176.0" y2="578.0" stroke="#e1e0d9"/>
+<line x1="926.0" y1="534.0" x2="1176.0" y2="534.0" stroke="#e1e0d9"/>
+<line x1="926.0" y1="490.0" x2="1176.0" y2="490.0" stroke="#e1e0d9"/>
+<line x1="926.0" y1="710" x2="1176.0" y2="710" stroke="#c3c2b7"/>
+<line x1="926.0" y1="710" x2="926.0" y2="715" stroke="#c3c2b7"/>
+<text x="926.0" y="730" font-size="13" text-anchor="middle" fill="#898781">May</text>
+<line x1="986.1" y1="710" x2="986.1" y2="715" stroke="#c3c2b7"/>
+<text x="986.1" y="730" font-size="13" text-anchor="middle" fill="#898781">Jun</text>
+<line x1="1044.2" y1="710" x2="1044.2" y2="715" stroke="#c3c2b7"/>
+<text x="1044.2" y="730" font-size="13" text-anchor="middle" fill="#898781">Jul</text>
+<line x1="1104.3" y1="710" x2="1104.3" y2="715" stroke="#c3c2b7"/>
+<text x="1104.3" y="730" font-size="13" text-anchor="middle" fill="#898781">Aug</text>
+<line x1="1164.4" y1="710" x2="1164.4" y2="715" stroke="#c3c2b7"/>
+<text x="1164.4" y="730" font-size="13" text-anchor="middle" fill="#898781">Sep</text>
+<line x1="1096.5" y1="490" x2="1096.5" y2="710" stroke="#c3c2b7"/>
+<rect x="1154.6" y="625.8" width="4" height="9.1" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="1156.6" cy="634.9" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="1168.2" y="616.4" width="4" height="10.1" rx="2" fill="#2a78d6" opacity="0.35"/>
+<circle cx="1170.2" cy="626.5" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<text x="1161.2" y="620.4" font-size="13" text-anchor="end" fill="#52514e" paint-order="stroke" stroke="#fcfcfb" stroke-width="4">p90 134 s</text>
+<g font-size="13" fill="#52514e">
+<text x="92" y="756">Weeks end Friday 23:59:59 UTC; the last point is the September 7 inspection. Each module compile in the wrapper's per-module log is one observation, joined to its project by build ID;</text>
+<text x="92" y="776">a module rebuilt in several runs counts once per run. Whole-run wall times are not shown: a run's record does not say how much of the project it rebuilt. Weekly compile counts, maxima,</text>
+<text x="92" y="796">and total module-seconds are in the companion CSV. Source size includes tracked generated and archived Lean and excludes named scratch and dependency paths.</text>
+</g></g></svg>
