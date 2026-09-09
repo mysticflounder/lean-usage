@@ -14,7 +14,7 @@ hand-maintained summary.
 - [Represent unproved in-project obligations loudly](#represent-unproved-in-project-obligations-loudly)
 - [Keep active `sorry`s load-bearing](#keep-active-sorrys-load-bearing)
 - [Require measured frontier reduction](#require-measured-frontier-reduction)
-- [Proof-blueprint state is live state](#proof-blueprint-state-is-live-state)
+- [Project status is live state](#project-status-is-live-state)
 - [Theorem-bank and archive evidence](#theorem-bank-and-archive-evidence)
 - [Solver and computation claims](#solver-and-computation-claims)
 - [Lean-ingress publication gate](#lean-ingress-publication-gate)
@@ -25,7 +25,7 @@ hand-maintained summary.
 ## Grounded proof progress
 
 For proof-facing work, keep a new declaration when its assumptions are produced
-on the active branch and an on-spine consumer immediately uses it, or when it
+on the active branch and a relevant consumer immediately uses it, or when it
 strictly removes target freedom: it closes a branch, excludes cases, or narrows
 a family.
 
@@ -37,7 +37,7 @@ Discard:
 - scratch declarations that nothing on the active proof path consumes.
 
 A required compatibility wrapper may remain only when explicitly marked
-compatibility-only and kept private or off-spine. It does not count as proof
+compatibility-only and kept private. It does not count as proof
 progress or closure.
 
 Supporting infrastructure, tests, documentation, and reusable APIs can be valid
@@ -61,7 +61,7 @@ Keep a durable repository record containing:
 5. the repository trust profile and toolchain/import identity used for promotion.
 
 Use the repository's declared location: a theorem docstring, formalization index,
-blueprint citation, or versioned closure record. A chat transcript, worker prompt,
+source citation, or versioned closure record. A chat transcript, worker prompt,
 or scratch file is not durable provenance. Recheck the record after statement or
 source changes.
 
@@ -107,7 +107,7 @@ in its statement and docstring.
 
 Before production mathematical proof or Lean promotion work, read the relevant
 docs and active closure plan. Every current `sorry` reachable from the headline
-or publish target must be covered by that plan. If the current anchor names an
+or publish target must be covered by that plan. If the current plan names an
 uncovered `sorry`, stop and ask before editing. This plan-coverage gate does not
 apply to configuration work, repository audits, or other non-proof maintenance.
 Scratch theorem proving is still proof work, not maintenance. Until coverage is
@@ -116,18 +116,17 @@ the blocker.
 
 The same-change load-bearing rules below apply to obligations introduced or
 actively refactored by the current plan, not every parked `sorry` in a large
-repository. The plan-coverage gate above still covers every current on-spine
+repository. The plan-coverage gate above still covers every current relevant
 `sorry`.
 
 - Name the headline or publish theorem that transitively consumes the obligation.
 - Add or update the consumer in the same change. An unwired theorem is an orphan.
 - A chain of placeholders is still orphaned if it never reaches the headline.
 - Remove scratch `sorry`s left by a failed route.
-- In proof-blueprint projects, verify reachability on the refreshed kernel spine.
-- Elsewhere, establish it from current imports and explicit theorem applications.
+- Verify reachability from current imports and explicit theorem applications.
 
 If wiring is blocked, stop and report the exact missing producer, consumer, import,
-or interface edge. Do not land more off-spine lemmas around the blocker.
+or interface edge. Do not land more unrelated lemmas around the blocker.
 
 Do not optimize raw counts. One theorem can hide dozens of branch-local holes;
 many named leaves can make the total problem more tractable when each is smaller,
@@ -139,24 +138,24 @@ but do not manufacture orphan lemmas merely to reduce the size of one theorem.
 
 ## Require measured frontier reduction
 
-For every production Lean promotion change in a proof-blueprint project:
+For every production Lean promotion change:
 
-1. Name the publish target, current anchored residual, and immediate consumer.
-2. Choose an explicit well-founded measure on the kernel-mined obligation frontier.
+1. Name the publish target, current residual, and immediate consumer.
+2. Choose an explicit well-founded measure on the obligation frontier.
 3. Record the coordinator-interface frontier before the change, its publish-target
    reachability, the chosen measure, and immediate constructor fan-out in the
    active closure plan.
 4. Accept the change as proof progress only when the measure strictly decreases.
-5. Refresh the kernel graph, run `proof-blueprint spine`, and record the frontier
-   after the change together with the named residual.
+5. Refresh the project's source/dependency status and record the frontier after
+   the change together with the named residual.
 
 The coordinator-interface frontier consists of unresolved theorem obligations and
 bookkeeping assumptions, structure fields, outcome enumerators, closers, or
 wrappers immediately consumed by the active coordinator.
 
-Closing or strengthening an on-spine `sorry` is the usual reduction. A
+Closing or strengthening a relevant `sorry` is the usual reduction. A
 kernel-checked case split may increase the raw `sorry` count only when the parent
-theorem proves that the branches cover every case, every new leaf remains on-spine,
+theorem proves that the branches cover every case, every new leaf remains relevant,
 and each branch strictly narrows the recorded measure. Record the branch enumerator,
 coverage theorem, per-leaf consumer, per-leaf measure, total fan-out, and aggregate
 before/after frontier. Prove disjointness when the coordinator or a downstream
@@ -165,24 +164,20 @@ counting argument relies on it.
 Judge the split as a whole. Accept it only when the multiset/lexicographic frontier
 measure required by the active plan strictly decreases and aggregate expected
 closure cost falls. A split that replaces one hard residual with many equivalent,
-duplicated, uncovered, or off-spine leaves is not progress even if every file builds.
+duplicated, or uncovered leaves is not progress even if every file builds.
 Raw `sorry` count and source-line count are never the progress measure.
 
 A green `lake-build` validates elaboration but does not establish this frontier
-reduction. The deliverable is the on-spine reduction reported by
-`proof-blueprint spine`, with the residual named explicitly. State the publish
-target, residual, measure, direct consumer, and strict on-spine reduction
-requirement in every production Lean dispatch.
+reduction. State the publish target, residual, measure, direct consumer, and strict
+reduction requirement in every production Lean dispatch. Establish the frontier
+from current imports and explicit theorem applications, then apply the same
+strict-reduction test using the measure required by the active plan.
 
-In a project without proof-blueprint, establish the frontier from current imports
-and explicit theorem applications, then apply the same strict-reduction test using
-the measure required by the active plan.
+## Project status is live state
 
-## Proof-blueprint state is live state
-
-Anchors are coordination cursors, not locks or durable ownership records. They can
-move or auto-descend as the spine changes. Re-run the anchor/status commands before
-editing or reporting. Distinguish:
+Project indexes and status documents are coordination aids, not locks or durable
+ownership records. Refresh the project's own status commands before editing or
+reporting. Distinguish:
 
 - a fresh source/declaration index;
 - a fresh kernel call graph and axiom closure;
@@ -243,7 +238,7 @@ When the computation changes the frontier, update status docs and tests together
 Any solver or certificate artifact that names or relies on a Lean declaration must
 pass this gate before it is called promoted, publishable, or consumer-reachable.
 The gate is fail-closed: while any part is missing or unchecked, the artifact may
-exist as diagnostic/off-spine evidence, but it carries no theorem-promotion claim.
+exist as diagnostic evidence, but it carries no theorem-promotion claim.
 For the field-by-field handoff schema, use item 9 of the compact
 [worker/promotion contract](worker-promotion-contract.md).
 
@@ -315,12 +310,11 @@ file, clean helper, or generic publication command cannot override a stricter
 repository trust profile. If the repository has no explicit rule for a detected
 boundary, stop and classify promotion as unverified rather than inventing permission.
 
-In proof-blueprint projects the explicit rule's machine-checked home is
-`.blueprint.toml` `[trust]` (`native_axioms`, `unsafe`, `partial`,
-`implemented_by`, `extern`) plus `[computations]` evidence manifests, enforced at
-promotion by `audit`/`verify-publish` under the computational-hygiene extension
-(2026-08-30). See the project's computational-evidence documentation for the
-contract and the deployed-tool version-skew caveat.
+The explicit rule's machine-checked home is the project's trust configuration
+(`native_axioms`, `unsafe`, `partial`, `implemented_by`, `extern`) plus any
+computational-evidence manifests, enforced by its publication gate. Follow the
+project's computational-evidence documentation for the contract and tool-version
+caveats.
 
 ## `native_decide`
 
@@ -337,11 +331,7 @@ must still hold:
    outside that selected whitelist, including an external axiom that the project's
    generic publication gate otherwise approves.
    The compiler-trust cost represented by `Lean.trustCompiler` must be reported
-   explicitly, never silently. `proof-blueprint axioms` treats the trio
-   (`Lean.ofReduceBool`, `Lean.ofReduceNat`, `Lean.trustCompiler`) as core-allowed
-   — no `[axioms].approved` entry needed — and prints them as `core*` under a
-   native-reduction-trust footnote; quote that output. A clean generic gate does
-   not discharge condition 2.
+   explicitly, never silently. A clean generic gate does not discharge condition 2.
 2. **The evaluated decision procedure is verified Lean code.** Its transitive
    evaluated closure must contain no `unsafe`, `partial`, `@[implemented_by]`, or
    `@[extern]` redirection that can make compiled behavior diverge from the verified
@@ -351,17 +341,11 @@ A textual grep is a useful preflight, not a proof that the transitive evaluated
 closure is clean. Use the project's source index/call graph and inspect all relevant
 definitions. Record both the kernel closure and the code audit in the closeout.
 
-A generic `proof-blueprint verify-publish` pass is necessary but not sufficient for
-this stricter audit: its general axiom-sanction mechanism may admit external axioms,
-and its implicit tool-level core set may differ from the repository's exact
-`native_decide` whitelist. Compare the literal `proof-blueprint axioms <symbol>` or
-`#print axioms` result against the repository policy. Under the computational-hygiene
-extension, `verify-publish` does fail closed on native reduction whose complete
-native-axiom closure is not listed in `[trust].native_axioms`, and on unlisted
-evaluated `unsafe`/`partial`/`@[implemented_by]`/`@[extern]` boundaries — but that
-narrows, rather than removes, the manual comparison: the repository whitelist may
-still be stricter than the configured trust sets, and the deployed release binary
-may predate the extension.
+The project's generic publication gate is necessary but not sufficient for this
+stricter audit: its axiom-sanction mechanism may admit external axioms, and its
+implicit core set may differ from the repository's exact `native_decide` whitelist.
+Compare the literal `#print axioms` result against repository policy and perform
+the manual implementation-boundary audit.
 
 Prefer kernel `decide` when it is feasible. Use `native_decide` for scale only after
 making the compiler trust boundary explicit. A proof inheriting native-decision
@@ -377,9 +361,9 @@ candidate—to re-read the effective instruction chain and independently check:
 1. durable source-to-statement fidelity and deliberate deltas;
 2. build/import reachability at the original exported final consumer;
 3. literal transitive axiom closure and every implementation/external trust boundary;
-4. absence of uncovered on-spine `sorry`s and freshness of the proof spine/status;
+4. absence of uncovered relevant `sorry`s and freshness of project status;
 5. branch coverage and aggregate tractability for any introduced decomposition;
-6. the repository's publication command or `verify-publish` gate when authorized.
+6. the repository's authorized publication command or gate.
 
 Record the verifier identity, source revision, commands/artifacts checked, and result
 in the repository's durable review record. The prover's completion report or cached

@@ -6,7 +6,7 @@
 # lake-build-example — a portable, trimmed version of the lake-build wrapper in
 # plugins/lean-usage/bin/lake-build. It keeps the parts that made the build
 # telemetry in docs/reports/ possible and drops the house-specific ones
-# (project-specific resync, spine archives, session identity, hook deployment).
+# (project-specific setup, session identity, hook deployment).
 #
 # From anywhere inside a Lake project it:
 #   - walks up to lakefile.toml / lakefile.lean ($LEAN_ROOT overrides);

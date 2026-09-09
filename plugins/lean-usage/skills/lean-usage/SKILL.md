@@ -19,9 +19,9 @@ build is authorized; it is not permission to build through an explicit no-build 
 1. **Read the live project contract.** Discover the project and Lake roots, applicable
    instruction chain, pinned toolchain, active plan/closure matrix, theorem-bank
    registries, trust profile, and build or publication gates.
-2. **Refresh current truth.** Read current source and imports. In proof-blueprint
-   projects, recheck the live anchor/status and refresh stale source/kernel indexes.
-   Anchors, line numbers, open-node counts, and rendered status files are snapshots.
+2. **Refresh current truth.** Read current source and imports. When a project
+   provides an indexed status or dependency view, refresh it before relying on
+   its snapshots, anchors, or line numbers.
 3. **Search before proving.** Search project banks first, then the indexed Lean
    corpora. Treat search hits as candidates until the reuse preflight below passes.
 4. **Make grounded progress.** Prove a useful result, shrink the target's freedom,
@@ -29,7 +29,7 @@ build is authorized; it is not permission to build through an explicit no-build 
    Do not commit wrapper networks or equivalent reformulations as proof progress.
 5. **Validate proportionally.** Build the smallest affected target first, then run
    broader and publication gates only when authorized and appropriate. Audit warnings,
-   import reachability, proof-spine edges, and axioms—not only exit status.
+   import reachability, dependency edges, and axioms—not only exit status.
 6. **Synchronize the record.** When the theorem frontier changes, update all living
    status/plan docs in the same change so stale claims do not remain authoritative.
 
@@ -38,19 +38,12 @@ build is authorized; it is not permission to build through an explicit no-build 
 Before deriving a finite pattern, incidence lemma, local contradiction, or helper,
 search the current project first, then the cross-project corpora.
 
-`proof-blueprint search` is the search tool for the CURRENT project wherever the
-project has a `.blueprint.toml` and a built index. It is the only search that knows
-the publish spine and the mined call graph, and it answers from an FTS5 trigram
-index (23x–113x faster in-project search):
+Use the project's own indexed search command when one is available; it is the
+fastest way to search declarations, statements, and docstrings in the CURRENT
+project. Otherwise use the repository's documented search facilities:
 
 ```bash
-proof-blueprint search "<terms>"                 # name / statement / docstring, all terms must match
-proof-blueprint search --name '<pattern>'        # name only (glob with * ?)
-proof-blueprint search --sig '<type fragment>'   # statement text only
-proof-blueprint search --doc '<concept>'         # docstring only
-proof-blueprint search "<terms>" --spine         # only what a publish target reaches
-proof-blueprint search --uses <Sym>              # who calls Sym  (--used-by for the reverse)
-proof-blueprint search --off-spine --with-sorry  # off-spine placeholders
+rg -n "<terms>" .
 ```
 
 `nthdegree docs search --lean` is the CROSS-PROJECT route — mathlib and every other
@@ -62,11 +55,8 @@ nthdegree docs search --lean --name '<name-pattern>' "<concept>"
 nthdegree docs search --lean --sig '<type fragment>' "<concept>"
 ```
 
-Neither replaces the other: `proof-blueprint search` matches substrings and globs
-over this project's indexed declarations only, while `nthdegree docs search --lean`
-ranks semantically across projects but knows nothing about the spine. In a project
-with no blueprint index, the corpora are the only theorem search available. Search
-both project terminology and concept-level mathematical language.
+Use both project terminology and concept-level mathematical language. Treat every
+search hit as a candidate until the reuse preflight below passes.
 
 Use `rg` for source navigation once you know which declaration you want, not as
 the theorem-discovery tool.
@@ -77,7 +67,7 @@ Before reusing a candidate, verify:
 - source path, current elaboration, and import reachability from the consumer;
 - kernel axiom closure and any approved trust boundary;
 - a hypothesis-by-hypothesis map from the live obligation;
-- the first missing antecedent, circularity risk, and immediate spine consumer.
+- the first missing antecedent, circularity risk, and immediate consumer.
 
 A contradiction consumer without a producer for its hypotheses is not a closure route.
 A precise negative compatibility result is still useful: record it before deriving anew.
@@ -112,22 +102,22 @@ is restricted to current-wave data.
 - Represent an in-project unproved obligation as a `sorry`-backed theorem against an
   explicit statement, not a named `axiom` and never a silent `True` placeholder.
 - Every `sorry` introduced or actively refactored by the current plan must be
-  load-bearing on the headline/publish proof spine and wired to its consumer.
-- For each production promotion change in a proof-blueprint project, name the
-  publish target, anchored residual, immediate consumer, and an explicit
-  well-founded measure on the kernel-mined obligation frontier. Accept the change
-  as proof progress only when that measure strictly decreases. A kernel-checked
-  case split may increase the raw `sorry` count only when the split is proved
-  exhaustive, every new leaf is on-spine, every branch strictly narrows the recorded
-  measure, and aggregate expected closure cost decreases.
+  load-bearing for the headline/publish theorem and wired to its consumer.
+- For each production promotion change, name the publish target, residual,
+  immediate consumer, and an explicit well-founded measure on the obligation
+  frontier. Accept the change as proof progress only when that measure strictly
+  decreases. A kernel-checked case split may increase the raw `sorry` count only
+  when the split is proved exhaustive, every new leaf is relevant, every branch
+  strictly narrows the recorded measure, and aggregate expected closure cost
+  decreases.
 - Record the coordinator-interface frontier before and after the change, publish
   reachability, chosen measure, and immediate constructor fan-out in the active
-  closure plan. Report the named residual and verify it with a fresh
-  `proof-blueprint spine`; a standalone green `lake-build` is insufficient.
-- If the obligation cannot be wired to its on-spine consumer, stop and report the
-  exact blocker instead of adding off-spine lemmas. State the target, residual,
-  measure, direct consumer, and strict on-spine reduction requirement in every
-  production Lean dispatch.
+  closure plan. Report the named residual and verify it with a fresh project
+  status/dependency query; a standalone green `lake-build` is insufficient.
+- If the obligation cannot be wired to its intended consumer, stop and report the
+  exact blocker instead of adding unrelated lemmas. State the target, residual,
+  measure, direct consumer, and strict reduction requirement in every production
+  Lean dispatch.
 - Judge decomposition by aggregate tractability, not raw `sorry` count. Many named,
   independently buildable branch leaves can be better than one theorem hiding many
   case holes when the measured frontier narrows. Do not create orphan obligations
@@ -136,9 +126,9 @@ is restricted to current-wave data.
   reason, and citation. Never approve a local IOU as an external axiom.
 - Label a statement-only or `sorry`-bearing formalization `SKETCH — NOT PROMOTABLE`.
   Compilation of a sketch is statement/type feedback, never proof or promotion.
-- In projects without proof-blueprint, establish reachability from the headline
-  theorem by source/import inspection, make the consumer explicit in the change,
-  and use the repository's active-plan measure for the same strict-reduction check.
+- Establish reachability from the headline theorem by source/import inspection,
+  make the consumer explicit in the change, and use the repository's active-plan
+  measure for the same strict-reduction check.
 
 Read [proof-discipline.md](references/proof-discipline.md) before changing obligations,
 using `native_decide`, importing archived/mined Lean, or evaluating solver evidence.
@@ -163,7 +153,7 @@ Any solver or certificate artifact that names or relies on a Lean declaration mu
 the Lean-ingress publication gate before it is described as promoted, publishable, or
 consumer-reachable. An isolated module build, theorem-name string, source comment, or
 unverified source hash is not sufficient. Omission of any bound field is fail-closed:
-the artifact may remain diagnostic/off-spine, but it carries no promotion claim. Read
+the artifact may remain diagnostic, but it carries no promotion claim. Read
 [Lean-ingress publication gate](references/proof-discipline.md#lean-ingress-publication-gate)
 before promoting solver or generated evidence into Lean.
 
@@ -178,7 +168,6 @@ scratch note is not a durable provenance record.
 lake-build                 # whole project
 lake-build Foo.Bar         # one target
 lake-build --jobs 4        # forwarded to `lake build`; advisory, not a hard cap
-lake-build --spine-archive # + .tar.gz of ONLY the ACTIVE spine files (default: off)
 
 cd <lake-root>
 lake exe cache get         # mathlib oleans; per project
@@ -191,24 +180,9 @@ is exceptional generated/certificate policy, never a default, and
 full [heartbeat policy](references/build-performance.md#heartbeat-policy).
 
 `lake-build` locates the Lake root, serializes top-level builds per project, caps each
-Lean worker's memory, records timing, and cleans up its lock/shim. On successful
-proof-blueprint builds it best-effort refreshes the source/kernel graph and rewrites
-`docs/live-blueprint.md`. `LAKE_BUILD_NO_REFRESH=1` disables that side effect; a green
-build can then coexist with stale blueprint state, so refresh explicitly before making
-proof-state or publication claims.
-
-`--spine-archive[=PATH]` is opt-in: after a successful build it packs the ACTIVE spine
-sources (`proof-blueprint spine --files`) plus the Lake scaffolding into a `.tar.gz`.
-The set is reachability-derived, not import-closed — see build-operations.
-
-`docs/live-blueprint.md` is therefore a **build artifact**, regenerated after every
-successful build in a proof-blueprint project — a `spine` snapshot of the open frontier,
-not a hand-authored document, and it says so in a do-not-edit banner on its first line
-(`spine` emits that banner whenever its stdout is a file). Do not edit it; the next
-build overwrites it. Read it
-after a build to see where the proof stands, and treat the `wrote …/docs/live-blueprint.md`
-line as the confirmation that it is current. Because the rewrite is best-effort, a green
-build whose render failed leaves the previous file in place.
+Lean worker's memory, records timing, and cleans up its lock/shim. Build status and
+publication records are project-owned; follow the project's own refresh commands and
+gates when they exist.
 
 Do not edit files in the running build's source graph and then cite that build as
 validation of the edited state. Prepare notes or the next change separately and wait
@@ -237,8 +211,8 @@ Read [build-performance.md](references/build-performance.md) when a build is slo
   active unimported module explicitly or add it to a real aggregate/CI target.
 - Treat warnings introduced or touched by the change as defects. In a noisy inherited
   tree, record the baseline and avoid unrelated cleanup unless it is in scope.
-- In proof-blueprint projects, confirm fresh source and kernel indexes, the intended
-  spine edge, actual axiom closure, focused tests, and `verify-publish` when publishing.
+- Confirm fresh source/dependency status, actual axiom closure, focused tests, and
+   the project's publication gate when publishing.
 - Audit the actual exported/final consumer, not only a helper: run transitive axiom
   closure and classify `sorryAx`, custom axioms, `Lean.ofReduceBool`/native trust,
   `unsafe`, `partial`, `implemented_by`, `extern`, and external artifacts under the
@@ -246,7 +220,7 @@ Read [build-performance.md](references/build-performance.md) when a build is slo
   evidence non-promotable.
 - Require an independent promotion verifier to re-read the effective repository
   contract and check statement fidelity, final-consumer reachability, build result,
-  transitive trust closure, and fresh spine/publication state. The prover's completion
+   transitive trust closure, and fresh publication state. The prover's completion
   report is not the verification. If no independent pass ran, report promotion as
   unverified.
 - Keep generated-payload exclusions narrow: omit bulk term shards when necessary, but

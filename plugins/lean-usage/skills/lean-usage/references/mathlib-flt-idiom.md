@@ -80,7 +80,7 @@ be appropriate, while a short tool-flavored name can still be poor.
 
 ## Design the public interface
 
-Identify the small mathematical surface downstream code and blueprint prose should
+Identify the small mathematical surface downstream code and project prose should
 depend on. Mark proof bookkeeping `private` unless it is intentionally a reusable
 library abstraction. An `Internal` namespace groups names but does not hide them.
 

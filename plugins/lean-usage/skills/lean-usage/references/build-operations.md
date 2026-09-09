@@ -21,14 +21,11 @@ for ordinary builds.
 lake-build
 lake-build Foo.Bar
 lake-build --jobs 4
-lake-build --spine-archive              # + pack the ACTIVE spine (default: off)
 ```
 
 It:
 
 - finds the Lake root by walking upward to `lakefile.toml`/`lakefile.lean`;
-- when invoked above a nested Lake tree, consults the nearest `.blueprint.toml`
-  `[paths].lean_root`, then `[paths].lean_lib`;
 - lets `LEAN_ROOT` override discovery;
 - uses a stale-PID-aware lock at `<lake-root>/.lake/lake-build.lock` to prevent
   concurrent top-level builds in the same project;
@@ -38,45 +35,6 @@ It:
   always removes its shim/lock — a signal interrupt still writes a partial
   per-build record and keeps the per-module records for modules already finished
   (see build-performance for the two JSONL files);
-- after a successful proof-blueprint build, best-effort runs
-  `proof-blueprint sync` and rewrites `docs/live-blueprint.md` (the file leads
-  with `spine`'s own do-not-edit banner — the wrapper adds no header of its own);
-- optionally packs the ACTIVE spine sources into a `.tar.gz` (`--spine-archive`).
-
-The post-build proof-blueprint refresh is best-effort and does not change the
-build exit code. Confirm freshness before relying on its output.
-
-## `--spine-archive` — packing the ACTIVE spine
-
-Off by default. `--spine-archive` and `-h`/`--help` are the only arguments the
-wrapper interprets; everything else forwards to `lake build`. It is consumed
-before the first `--`, so `lake-build -- --spine-archive` passes the string
-through to Lake instead.
-
-```bash
-lake-build --spine-archive                       # -> <blueprint-project>/spine.tar.gz
-lake-build --spine-archive=/tmp/p97.tar.gz Foo.Bar
-```
-
-The value form needs `=`; a space-separated path would be indistinguishable from
-a build target. A relative PATH resolves against the blueprint project dir.
-
-| Aspect | Behavior |
-|---|---|
-| Requires | A proof-blueprint project (`.blueprint.toml` at or above the Lake root) and `proof-blueprint` on `PATH`. |
-| File set | `proof-blueprint spine --files` — every indexed `.lean` declaring a symbol reachable from the `[publish] target_symbol(s)`. Dead and off-spine WIP sources are excluded. |
-| Also packed | `lakefile.toml`, `lakefile.lean`, `lean-toolchain`, `lake-manifest.json`, when present at the Lake root. |
-| Layout | One top-level dir named for the archive; members sit at their path relative to the Lake root. Ownership is zeroed. |
-| Ordering | Runs after the post-build resync, so the file set reflects the build that just finished. |
-| Failed build | Skipped; the build's own exit code is returned unchanged. |
-| Failed archive | Reported on stderr; an otherwise-successful run exits 1. Unlike the resync, this is not best-effort — it was explicitly requested. |
-
-The spine file set is reachability-derived, **not import-closed**: a spine file
-can import a module that contributes no reachable symbol, so that module is
-absent and the tree may not build as-is. The wrapper checks and names every
-unsatisfied project import after writing. Treat the archive as the active proof
-source, not as a guaranteed standalone build.
-
 ## Environment overrides
 
 | Variable | Effect |
@@ -87,7 +45,6 @@ source, not as a guaranteed standalone build.
 | `REAL_LAKE`, `REAL_LEAN` | Explicit toolchain executables. |
 | `LEAN_USAGE_STATE_DIR` | Stats directory; default `~/.local/state/lean-usage`. |
 | `LAKE_BUILD_TARGET_S`, `LAKE_BUILD_CEIL_S` | Warning thresholds; defaults `600` and `1800`. They configure nudges, not a universal project policy. |
-| `LAKE_BUILD_NO_REFRESH` | Skip proof-blueprint sync and `docs/live-blueprint.md` rewrite. Refresh manually before proof-state claims. |
 | `LAKE_BUILD_NO_MODULE_STATS` | Skip writing per-module timing records to `module-build-stats.jsonl` (the per-build `build-stats.jsonl` is still written). |
 | `LEAN_USAGE_SKIP_CACHE_CHECK=1` | Bypass the pre-build mathlib-cache guard for a deliberate source build. |
 

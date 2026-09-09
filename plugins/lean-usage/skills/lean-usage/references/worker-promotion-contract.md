@@ -20,13 +20,13 @@ to the `attic` plugin on 2026-08-14.)
    and exported/headline final consumer. Never weaken or silently repair a statement
    to make it compile. Label statement-only or `sorry`-bearing work
    `SKETCH — NOT PROMOTABLE`.
-3. **Keep obligations honest and on-spine.** Represent an in-project unproved claim
+3. **Keep obligations honest and consumer-reachable.** Represent an in-project unproved claim
    as an explicit `sorry`-backed theorem, never a local `axiom`, `True`, or vacuous
    substitute. Before production proof work, require active-plan coverage for every
-   final-consumer-reachable `sorry`; an uncovered on-spine `sorry` is a hard stop.
+   final-consumer-reachable `sorry`; an uncovered relevant `sorry` is a hard stop.
    Every introduced/refactored obligation must reach the named final consumer.
 4. **Accept only tractable splits.** A finite case split is progress only when the
-   parent proves complete branch coverage, every leaf has a named on-spine consumer,
+   parent proves complete branch coverage, every leaf has a named consumer,
    every branch strictly decreases the recorded well-founded frontier measure, and
    the aggregate expected closure cost decreases. Record before/after frontier,
    fan-out, per-branch residual/measure, and disjointness when consumers need it.
@@ -54,7 +54,7 @@ to the `attic` plugin on 2026-08-14.)
 8. **Do not self-promote.** A separate verifier that did not author the candidate
    must re-read the effective instructions and independently check statement/source
    fidelity, original-consumer build and reachability, transitive axiom and execution
-   trust, on-spine `sorry` status, split coverage/tractability, and the authorized
+   trust, relevant `sorry` status, split coverage/tractability, and the authorized
    publication gate. Record revision, verifier, commands/artifacts, and result. If no
    independent pass ran, report `candidate verified by author only — NOT PROMOTED`.
 9. **Bind Lean ingress before publication.** A handoff that names a Lean declaration
@@ -70,7 +70,7 @@ to the `attic` plugin on 2026-08-14.)
    during certificate replay/publication; (h) a versioned, domain-separated self-hash
    over the complete binding; and (i) typed, domain-separated parent links binding
    parent schema, record kind, and parent record digest. This is fail-closed: omission
-   of any field blocks publication. The evidence may remain diagnostic/off-spine, but
+   of any field blocks publication. The evidence may remain diagnostic, but
    no promotion, publication, or consumer-reachability claim may be made. A green
    isolated module build, a theorem-name string, or a source hash outside the
    certificate self-hash satisfies none of it.

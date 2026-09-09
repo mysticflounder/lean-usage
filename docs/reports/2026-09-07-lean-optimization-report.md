@@ -570,14 +570,14 @@ All commit IDs above belong to [local-plugins history](https://github.com/mystic
 
 #### What the script currently establishes
 
-The wrapper discovers the Lake root, acquires a stale-PID-aware per-project lock, runs Lake with streamed output, records timings, and performs optional post-build work. It forwards target arguments, so affected-module builds use the same route as full builds. The lock serializes top-level wrapper invocations in one project; it does not coordinate different projects or raw Lean invocations and does not constrain Lake's worker count.
+The wrapper discovers the Lake root, acquires a stale-PID-aware per-project lock, runs Lake with streamed output, and records timings. It forwards target arguments, so affected-module builds use the same route as full builds. The lock serializes top-level wrapper invocations in one project; it does not coordinate different projects or raw Lean invocations and does not constrain Lake's worker count.
 
 The implementation keeps module timing overhead small by reading the output stream it already drains. It records `build_id` so build and module rows can be joined. `LAKE_BUILD_NO_MODULE_STATS` suppresses module records. Timing records do not establish proof validity.
 
 Four details matter when interpreting the advertised behavior:
 
 1. **Memory cap:** [the repository revision's shim construction](https://github.com/mysticflounder/lean-usage/blob/4b796af/plugins/lean-usage/bin/lake-build#L811) injects `-M` through PATH, but [the same source's explanation](https://github.com/mysticflounder/lean-usage/blob/4b796af/plugins/lean-usage/bin/lake-build#L873) and `d9fa70c` state that Lake bypasses PATH; the inspected older installed wrapper has the same limitation. When a memory-cap field is present in the stats, it records a requested setting, not verified enforcement. A missing field can reflect schema history, not absence of a limit. Inspect each lakefile for the actual cap.
-2. **Build duration:** [stats cover the Lake phase, before post-build work](https://github.com/mysticflounder/lean-usage/blob/4b796af/plugins/lean-usage/bin/lake-build#L940). `duration_s` measures the Lake phase, not the entire wrapper invocation. A requested archive can subsequently fail and change the final wrapper exit status despite a successful Lake row.
+2. **Build duration:** `duration_s` measures the Lake phase, not setup and teardown around the wrapper invocation.
 3. **Recompilation count:** [the current counter](https://github.com/mysticflounder/lean-usage/blob/4b796af/plugins/lean-usage/bin/lake-build#L880) recognizes `Built`, `Building`, and `Compiling` progress markers. It is useful activity evidence, but should not be represented as an exact count of unique re-elaborated Lean source modules. Per-module rows have their own parsing rule.
 4. **Cache guard:** [the hook](https://github.com/mysticflounder/lean-usage/blob/4b796af/plugins/lean-usage/hooks/mathlib-cache-check.py#L216) depends on recognized command/tool shapes, upward Lake-root discovery, and an olean population check. The hook is a useful prevention mechanism, not a content-validity audit of every dependency artifact.
 
@@ -669,8 +669,6 @@ The house skills also reduce repeated agent work: reuse searches are keyed to th
 ## Appendix — Scope, evidence, and coverage
 
 ### Scope and evidence
-
-We used an internal tool called proof-blueprint to help prepare this report.
 
 - Review date: 2026-09-07. History searches covered locally available reachable refs, without a recent-date cutoff, followed by selected commit bodies/diffs and current files. This is not a replay of every historical build or proof.
 - Scope: Adam's math-projects workspace, relevant nested Lean roots and historical variants, Lean-related plugin sources, targeted nthdegree conversation evidence, and the Mac host's memory-watchdog deployment/history. Empty directories, dependencies, and projects with no distinct optimization evidence are identified in the coverage appendix.

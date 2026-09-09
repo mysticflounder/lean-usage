@@ -13,18 +13,11 @@
 # "Built <module> (Ns)" progress lines — into a second JSONL file
 # (module-build-stats.jsonl). An interrupt (Ctrl-C / SIGTERM) still records a
 # partial per-build record and keeps the already-written per-module records.
-# In a proof-blueprint project (a .blueprint.toml at or above the Lake tree) it
-# runs `proof-blueprint sync` after a successful build to resync the index +
-# kernel call graph, then snapshots the open-frontier spine to
-# docs/live-blueprint.md; opt out with LAKE_BUILD_NO_REFRESH=1. With
-# --spine-archive it then packs the ACTIVE spine sources (the files behind
-# `proof-blueprint spine --files`) plus the Lake scaffolding into a .tar.gz.
 # Deployed to ~/.local/bin/lake-build by the lean-usage SessionStart hook.
 """Python port of the lake-build wrapper (formerly a bash script).
 
 Passthrough: any ARGS are forwarded verbatim to `lake build ARGS`. The wrapper
-consumes only a leading `-h`/`--help` and `--spine-archive[=PATH]` (off by
-default), both before the first `--`; a leading `--` forces everything after it
+consumes only a leading `-h`/`--help`; a leading `--` forces everything after it
 to be forwarded (so `lake-build -- --help` reaches Lake's own build help).
 """
 
@@ -35,27 +28,11 @@ import shutil
 import signal
 import subprocess
 import sys
-import tarfile
 import tempfile
 import time
 from datetime import datetime, timezone
 
 PROG = "lake-build"
-
-# The one wrapper-owned flag (everything else forwards to `lake build`). Bare
-# form uses SPINE_ARCHIVE_DEFAULT; `=PATH` overrides. The `=` form is required —
-# a space-separated value would be indistinguishable from a build target.
-SPINE_ARCHIVE_FLAG = "--spine-archive"
-SPINE_ARCHIVE_DEFAULT = "spine.tar.gz"
-
-# Lake-root files that make the archived sources a buildable tree. Copied when
-# present; a missing one is not an error (not every project has a manifest).
-SPINE_ARCHIVE_SCAFFOLDING = (
-    "lakefile.toml", "lakefile.lean", "lean-toolchain", "lake-manifest.json",
-)
-
-# How many unsatisfied imports to name before collapsing to a count.
-SPINE_ARCHIVE_MAX_LISTED = 10
 
 HELP = f"""\
 {PROG} — global Lean/Lake build wrapper.
@@ -63,9 +40,6 @@ HELP = f"""\
 Usage:
   {PROG} [ARGS...]
       Build; ARGS are forwarded verbatim to `lake build`.
-  {PROG} {SPINE_ARCHIVE_FLAG}[=PATH]
-      After a successful build, also write a .tar.gz of ONLY the ACTIVE spine
-      files (default: off). See below.
   {PROG} -- [ARGS...]
       Forward everything after `--` verbatim, even `-h`/`--help`, without this
       wrapper consuming them. Note `lake build` treats `--help` as a build
@@ -74,32 +48,9 @@ Usage:
   {PROG} -h | --help
       Show this help and exit.
 
-{SPINE_ARCHIVE_FLAG} is the only argument this wrapper interprets besides `-h`
-and `--`; it is consumed before the first `--` and never reaches Lake. The bare
-form writes <blueprint-project>/{SPINE_ARCHIVE_DEFAULT}; `{SPINE_ARCHIVE_FLAG}=PATH`
-writes PATH (a relative PATH resolves against the blueprint project dir). It
-needs a proof-blueprint project and the `proof-blueprint` CLI, and runs after
-the post-build resync so the file set reflects the build that just finished.
-
-  Contents  The ACTIVE spine sources — every indexed .lean file declaring a
-            symbol reachable from the [publish] target_symbol(s), per
-            `proof-blueprint spine --files`. Dead and off-spine WIP sources are
-            excluded. Plus these, when present at the Lake root:
-            {", ".join(SPINE_ARCHIVE_SCAFFOLDING)}.
-            Every path is stored under one top-level dir named for the archive,
-            at its location relative to the Lake root.
-  Caveat    The spine file set is reachability-derived, NOT import-closed: a
-            spine file may import a module that contributes no reachable symbol
-            and is therefore absent. The wrapper checks this and names every
-            unsatisfied project import; the archive is written either way.
-  Exit      A requested archive that fails to write reports on stderr and makes
-            an otherwise-successful run exit 1. A failing build's exit code is
-            never masked, and the archive is skipped.
-
 Runs from anywhere inside a Lake project. It:
-  - locates the Lake root by walking up to lakefile.toml/lakefile.lean, or via
-    the nearest .blueprint.toml [paths].lean_root (else lean_lib) when invoked
-    above a nested Lake tree; $LEAN_ROOT overrides discovery;
+  - locates the Lake root by walking up to lakefile.toml/lakefile.lean;
+    $LEAN_ROOT overrides discovery;
   - serializes top-level builds per project with a stale-PID-aware lockfile;
   - retains live build output in lake-build-logs/ beside the lock and prints its path;
   - puts a temporary `lean` shim on PATH to cap each worker's memory ($MEMORY_MB);
@@ -111,18 +62,12 @@ Runs from anywhere inside a Lake project. It:
     targets recompiled (0 = fully-cached no-op); an interrupt still records a
     partial record ("interrupted": true) with the elapsed time and count so far;
   - nudges when a build crosses the time budget;
-  - after a successful proof-blueprint build, best-effort runs
-    `proof-blueprint sync` and rewrites docs/live-blueprint.md
-    (skip with LAKE_BUILD_NO_REFRESH=1);
-  - optionally packs the ACTIVE spine sources into a .tar.gz (--spine-archive).
 
 Examples:
   {PROG}                   # build the whole project
   {PROG} Foo.Bar           # build one target
   {PROG} --jobs 4          # forwarded to `lake build` (advisory, not a hard cap)
   MEMORY_MB=8192 {PROG}    # tighter per-worker memory cap
-  {PROG} --spine-archive   # build, then pack the active spine to spine.tar.gz
-  {PROG} --spine-archive=/tmp/p97-spine.tar.gz Foo.Bar
 
 Environment:
   LEAN_ROOT             Explicit Lake root (overrides discovery).
@@ -133,7 +78,6 @@ Environment:
   LEAN_USAGE_STATE_DIR  Stats directory. Default ~/.local/state/lean-usage.
   LAKE_BUILD_TARGET_S   Over-target warning threshold, seconds. Default 600.
   LAKE_BUILD_CEIL_S     Over-ceiling warning threshold, seconds. Default 1800.
-  LAKE_BUILD_NO_REFRESH Set to any value to skip the proof-blueprint post-build refresh.
   LAKE_BUILD_NO_MODULE_STATS  Set to any value to skip writing per-module timing
                         records to module-build-stats.jsonl.
 
@@ -220,86 +164,6 @@ def uses_mathlib(lean_root: str) -> bool:
         except OSError:
             pass
     return False
-
-
-def find_blueprint(start: str | None = None) -> str | None:
-    """Walk up from `start` to the nearest .blueprint.toml; return its full path."""
-    d = _abs_dir(start)
-    if d is None:
-        return None
-    while True:
-        candidate = os.path.join(d, ".blueprint.toml")
-        if os.path.isfile(candidate):
-            return candidate
-        parent = os.path.dirname(d)
-        if parent == d:
-            return None
-        d = parent
-
-
-def blueprint_paths_value(path: str, keys: tuple[str, ...] = ("lean_root", "lean_lib")) -> str | None:
-    """Return the first of `keys` present in a .blueprint.toml's [paths] table.
-
-    The default order is the Lake-root pointer: lean_root (explicit) wins over
-    lean_lib (the Lean srcDir). Pass `("lean_lib",)` when you specifically need
-    the srcDir — the base the blueprint's own relative paths hang off, which is
-    not the same directory when the lakefile sits above it. This is the same
-    minimal, quote-stripping, section-aware TOML scan the bash version used
-    (no full parser, no regex): drop trailing `#` comments, track the current
-    `[section]`, and read simple quoted scalars inside [paths]. Returns None if
-    none of `keys` is present.
-    """
-    found: dict[str, str] = {}
-    section = None
-    try:
-        with open(path, "r", encoding="utf-8", errors="replace") as fh:
-            lines = fh.readlines()
-    except OSError:
-        return None
-    for raw in lines:
-        line = raw
-        hash_at = line.find("#")
-        if hash_at >= 0:  # drop trailing comment
-            line = line[:hash_at]
-        t = line.strip()
-        if t == "":
-            continue
-        if t[0] == "[":  # section header, e.g. [paths] or [[array]]
-            section = t.lstrip("[").rstrip("]").strip()
-            continue
-        if section != "paths":
-            continue
-        eq = t.find("=")
-        if eq < 0:
-            continue
-        key = t[:eq].strip()
-        val = t[eq + 1:].strip()
-        if len(val) >= 2:  # strip one layer of matching quotes
-            q = val[0]
-            if q in ("\"", "'") and val[-1] == q:
-                val = val[1:-1]
-        if key in keys and val:
-            found[key] = val
-    for k in keys:
-        if k in found:
-            return found[k]
-    return None
-
-
-def find_lean_root_via_blueprint() -> str | None:
-    """Resolve the Lake root through the nearest .blueprint.toml [paths] pointer.
-
-    Reads the pointer, resolves it relative to the blueprint dir, then walks up
-    to the enclosing lakefile (lean_lib is a srcDir that may sit below it).
-    """
-    bp = find_blueprint(os.getcwd())
-    if not bp:
-        return None
-    bp_dir = os.path.dirname(bp)
-    val = blueprint_paths_value(bp)
-    if not val:
-        return None
-    return find_lean_root(os.path.join(bp_dir, val))
 
 
 # --- lockfile (stale-pid aware) -------------------------------------------
@@ -462,41 +326,20 @@ def _env_int(name: str, default: int) -> int:
         return default
 
 
-def parse_args(argv: list[str]) -> tuple[list[str], str | None]:
-    """Split argv into `(forward_to_lake, spine_archive_path)`.
-
-    `spine_archive_path` is None when --spine-archive was not given (the
-    default: off), otherwise the requested path — SPINE_ARCHIVE_DEFAULT for the
-    bare flag, else the `=PATH` value.
-
-    Wrapper-owned arguments (-h/--help, --spine-archive) are consumed only
-    *before* the first `--`; from that separator on, everything — including the
-    separator itself, which Lake accepts — is forwarded verbatim. A leading `--`
-    keeps its original meaning: pure passthrough, nothing consumed.
-    """
+def parse_args(argv: list[str]) -> list[str]:
+    """Split wrapper help from arguments forwarded to Lake."""
     if argv and argv[0] in ("-h", "--help"):
         sys.stdout.write(HELP)
         sys.exit(0)
     if argv and argv[0] == "--":  # explicit passthrough separator
-        return argv[1:], None
+        return argv[1:]
     forward: list[str] = []
-    archive: str | None = None
-    eq_prefix = SPINE_ARCHIVE_FLAG + "="
     for i, arg in enumerate(argv):
         if arg == "--":
             forward.extend(argv[i:])
             break
-        if arg == SPINE_ARCHIVE_FLAG:
-            archive = SPINE_ARCHIVE_DEFAULT
-        elif arg.startswith(eq_prefix):
-            archive = arg[len(eq_prefix):]
-            if not archive:
-                err(f"{PROG}: {eq_prefix}PATH needs a non-empty path "
-                    f"(bare {SPINE_ARCHIVE_FLAG} uses {SPINE_ARCHIVE_DEFAULT})")
-                sys.exit(2)
-        else:
-            forward.append(arg)
-    return forward, archive
+        forward.append(arg)
+    return forward
 
 
 def _append_jsonl(path: str, record: dict) -> None:
@@ -546,221 +389,15 @@ def parse_built_line(line: str):
     return module, duration, warnings
 
 
-def spine_files(proj_dir: str) -> list[str] | None:
-    """The ACTIVE spine source files, via `proof-blueprint spine --files`.
-
-    That mode puts one absolute .lean path per line on stdout and every other
-    message on stderr, so the list needs no parsing and its exit code answers
-    "is there a list?" rather than "is the spine closed?" — an open spine (the
-    normal state) is not a failure here. Returns None on any nonzero exit; the
-    child's stderr is left attached so its diagnosis reaches the user.
-    """
-    try:
-        res = subprocess.run(
-            ["proof-blueprint", "spine", "--files"],
-            cwd=proj_dir, stdout=subprocess.PIPE, text=True,
-            encoding="utf-8", errors="replace",
-        )
-    except OSError as exc:
-        err(f"{PROG}: could not run `proof-blueprint spine --files`: {exc}")
-        return None
-    if res.returncode != 0:
-        err(f"{PROG}: `proof-blueprint spine --files` exited {res.returncode}")
-        return None
-    return [ln.strip() for ln in res.stdout.splitlines() if ln.strip()]
-
-
-def strip_lean_comments(line: str, depth: int) -> tuple[str, int]:
-    """`(code_outside_comments, new_depth)` for one line at nesting `depth`.
-
-    Handles Lean's nesting `/- … -/` block comments (including the `/-!` and
-    `/--` doc forms, which share the `/-` opener) and `--` line comments. Every
-    source file here opens with a license block whose *body* lines look like
-    ordinary text, so a scanner that doesn't track depth reads the first of
-    those as code — which is why this exists rather than a per-line prefix test.
-    """
-    out: list[str] = []
-    i = 0
-    n = len(line)
-    while i < n:
-        two = line[i:i + 2]
-        if depth > 0:
-            if two == "-/":
-                depth -= 1
-                i += 2
-            elif two == "/-":
-                depth += 1
-                i += 2
-            else:
-                i += 1
-            continue
-        if two == "/-":
-            depth += 1
-            i += 2
-            continue
-        if two == "--":
-            break  # line comment — the rest of the line is not code
-        out.append(line[i])
-        i += 1
-    return "".join(out), depth
-
-
-def lean_imports(path: str) -> list[str]:
-    """Module names imported by a Lean source file.
-
-    Lean requires the import block at the top of the file, so the scan stops at
-    the first real command. Comments are stripped with the depth-tracking
-    scanner above, so a leading license block doesn't end the scan early.
-    """
-    mods: list[str] = []
-    depth = 0
-    try:
-        with open(path, "r", encoding="utf-8", errors="replace") as fh:
-            for raw in fh:
-                code, depth = strip_lean_comments(raw, depth)
-                line = code.strip()
-                if line == "":
-                    continue
-                if line.startswith("import "):
-                    token = line[len("import "):].strip().split()
-                    if token:
-                        mods.append(token[0])
-                    continue
-                if line in ("prelude", "module"):
-                    continue
-                break  # first real command — the import block is over
-    except OSError:
-        pass
-    return mods
-
-
-def unsatisfied_imports(members: set[str], lean_lib: str | None) -> list[str]:
-    """Project modules imported by the archived sources but absent from them.
-
-    A module counts as a project module only when its source exists under
-    `lean_lib` — that's what separates a same-tree import from Mathlib/Init,
-    which legitimately aren't in the archive. With no `lean_lib` the test can't
-    be made, so nothing is reported rather than everything.
-    """
-    if not lean_lib:
-        return []
-    missing: set[str] = set()
-    for path in members:
-        for mod in lean_imports(path):
-            src = os.path.join(lean_lib, *mod.split(".")) + ".lean"
-            if os.path.isfile(src) and src not in members:
-                missing.add(mod)
-    return sorted(missing)
-
-
-def write_spine_archive(out_path: str, lean_root: str, members: list[str]) -> None:
-    """Write `members` to `out_path` as a gzipped tar, atomically.
-
-    Every entry lands under one top-level directory named for the archive, at
-    its path relative to the Lake root, so unpacking never scatters files into
-    the cwd. Ownership is zeroed: the archive is meant to be handed to someone
-    else, and the builder's uid/gid is not part of the proof.
-    """
-    top = os.path.basename(out_path)
-    for suffix in (".tar.gz", ".tgz", ".tar"):
-        if top.endswith(suffix):
-            top = top[: -len(suffix)]
-            break
-    tmp_path = out_path + ".tmp"
-
-    def normalize(info: tarfile.TarInfo) -> tarfile.TarInfo:
-        info.uid = info.gid = 0
-        info.uname = info.gname = ""
-        return info
-
-    with tarfile.open(tmp_path, "w:gz") as tar:
-        for path in members:
-            arcname = os.path.join(top, os.path.relpath(path, lean_root))
-            tar.add(path, arcname=arcname, filter=normalize)
-    os.replace(tmp_path, out_path)
-
-
-def make_spine_archive(requested: str, proj_dir: str, lean_root: str) -> bool:
-    """Pack the ACTIVE spine sources plus build scaffolding into a .tar.gz.
-
-    Returns True on success. Unlike the blueprint refresh above, this is NOT
-    best-effort: the archive was explicitly asked for, so a failure is reported
-    and surfaced in the exit code rather than silently skipped.
-    """
-    out_path = requested if os.path.isabs(requested) else os.path.join(proj_dir, requested)
-    files = spine_files(proj_dir)
-    if files is None:
-        return False
-    if not files:
-        err(f"{PROG}: spine is empty — no active files to archive")
-        return False
-
-    members: list[str] = []
-    outside = 0
-    for path in files:
-        if not os.path.isfile(path):
-            continue  # index drift: a dropped source is simply not archived
-        rel = os.path.relpath(path, lean_root)
-        if rel.startswith(os.pardir + os.sep) or rel == os.pardir:
-            outside += 1
-            continue
-        members.append(path)
-    if outside:
-        err(f"{PROG}: {outside} spine file(s) live outside the Lake root "
-            f"{lean_root} and were skipped")
-    n_spine = len(members)
-    if not n_spine:
-        err(f"{PROG}: no spine file resolved to a real source under {lean_root}")
-        return False
-
-    spine_set = set(members)
-    for name in SPINE_ARCHIVE_SCAFFOLDING:
-        candidate = os.path.join(lean_root, name)
-        if os.path.isfile(candidate):
-            members.append(candidate)
-
-    try:
-        os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
-        write_spine_archive(out_path, lean_root, members)
-    except (OSError, tarfile.TarError) as exc:
-        err(f"{PROG}: could not write {out_path}: {exc}")
-        return False
-
-    size_kb = os.path.getsize(out_path) // 1024
-    err(f"{PROG}: wrote {out_path} — {n_spine} active spine file(s) + "
-        f"{len(members) - n_spine} scaffolding file(s), {size_kb} KB")
-
-    # The spine set is reachability-derived, not import-closed. Say so with the
-    # actual names rather than letting "buildable tree" go unqualified.
-    bp = find_blueprint(lean_root)
-    lean_lib = None
-    if bp:
-        rel_lib = blueprint_paths_value(bp, ("lean_lib",))
-        if rel_lib:
-            lean_lib = os.path.join(os.path.dirname(bp), rel_lib)
-    missing = unsatisfied_imports(spine_set, lean_lib)
-    if missing:
-        shown = ", ".join(missing[:SPINE_ARCHIVE_MAX_LISTED])
-        more = len(missing) - SPINE_ARCHIVE_MAX_LISTED
-        if more > 0:
-            shown += f", … {more} more"
-        err(f"{PROG}: archive is NOT import-closed — {len(missing)} project "
-            f"module(s) imported by spine files are off-spine and absent: {shown}")
-    return True
-
-
 def main() -> int:
-    forward_args, spine_archive = parse_args(sys.argv[1:])
+    forward_args = parse_args(sys.argv[1:])
 
     # --- resolve the Lake root --------------------------------------------
-    # Precedence: $LEAN_ROOT > walk up from cwd to a lakefile > .blueprint.toml
-    # [paths].lean_root|lean_lib. The blueprint step finds a Lake tree living in
-    # a *subdir* when you invoke from the project root above it.
-    lean_root = os.environ.get("LEAN_ROOT") or find_lean_root(os.getcwd()) or find_lean_root_via_blueprint()
+    # Precedence: $LEAN_ROOT > walk up from cwd to a lakefile.
+    lean_root = os.environ.get("LEAN_ROOT") or find_lean_root(os.getcwd())
     if not lean_root or not os.path.isdir(lean_root):
         err(
-            f"{PROG}: no lakefile.toml/lakefile.lean found from {os.getcwd()} upward, "
-            "and no .blueprint.toml [paths].lean_root/lean_lib pointed to one "
+            f"{PROG}: no lakefile.toml/lakefile.lean found from {os.getcwd()} upward "
             "(set LEAN_ROOT to override)"
         )
         return 1
@@ -862,8 +499,8 @@ def main() -> int:
     # --- run + time -------------------------------------------------------
     # A build is dead time if you watch it compile — nudge toward working ahead.
     err(
-        f"{PROG}: building — don't just wait on it. Update docstrings/module docs/"
-        "blueprint entries for what you just wrote, stage the next edit or commit "
+        f"{PROG}: building — don't just wait on it. Update docstrings/module docs "
+        "for what you just wrote, stage the next edit or commit "
         "message, or line up the next module while this runs."
     )
 
@@ -964,73 +601,6 @@ def main() -> int:
                 f"{budget_target_s // 60}m target; watch the slowest modules before they "
                 f"cross {budget_ceil_s // 60}m."
             )
-
-    # --- proof-blueprint post-build resync --------------------------------
-    # On a successful build, resync the proof-blueprint index + kernel call graph
-    # so spine/status/tree reflect the just-built oleans, then write the current
-    # open-frontier blueprint to docs/live-blueprint.md. Guarded to a
-    # proof-blueprint project (a .blueprint.toml at or above the Lake tree, found
-    # by walking up from lean_root) with the tool installed. `proof-blueprint
-    # sync` takes the project's own refresh lock, so concurrent runs serialize.
-    # Best-effort: failures are reported but never fail the build.
-    if exit_code == 0 and not os.environ.get("LAKE_BUILD_NO_REFRESH") and shutil.which("proof-blueprint"):
-        bp = find_blueprint(lean_root)
-        if bp:
-            proj_dir = os.path.dirname(bp)
-            err(f"{PROG}: resyncing proof-blueprint (index + call graph) …")
-            sync = subprocess.run(["proof-blueprint", "sync"], cwd=proj_dir)
-            if sync.returncode != 0:
-                err(f"{PROG}: proof-blueprint sync failed (build OK; resync is best-effort)")
-            # Snapshot the open-frontier spine. `spine` exits 1 whenever the
-            # target is still open (the normal state), so its exit status is
-            # deliberately ignored — the write is gated on a non-empty render.
-            wrote = False
-            try:
-                docs_dir = os.path.join(proj_dir, "docs")
-                os.makedirs(docs_dir, exist_ok=True)
-                tmp_path = os.path.join(docs_dir, "live-blueprint.md.tmp")
-                final_path = os.path.join(docs_dir, "live-blueprint.md")
-                with open(tmp_path, "w", encoding="utf-8") as out:
-                    # `spine` writes its own do-not-edit banner when stdout is a
-                    # regular file, which this is — no header is added here, so
-                    # the banner text has exactly one owner (the CLI).
-                    subprocess.run(
-                        ["proof-blueprint", "spine"],
-                        cwd=proj_dir,
-                        stdout=out,
-                        stderr=subprocess.DEVNULL,
-                    )
-                if os.path.getsize(tmp_path) > 0:
-                    os.replace(tmp_path, final_path)
-                    wrote = True
-                else:
-                    os.unlink(tmp_path)
-            except OSError:
-                wrote = False
-            if wrote:
-                err(f"{PROG}: wrote {proj_dir}/docs/live-blueprint.md")
-            else:
-                err(f"{PROG}: could not render docs/live-blueprint.md (build OK; best-effort)")
-
-    # --- ACTIVE spine archive (opt-in) ------------------------------------
-    # Runs last, after the resync above, so the file set comes from the graph
-    # this build just produced rather than the previous one. Skipped entirely
-    # on a failed build: archiving sources whose oleans didn't compile would
-    # hand over a snapshot the spine can't vouch for.
-    if spine_archive is not None:
-        if exit_code != 0:
-            err(f"{PROG}: build failed — skipping {SPINE_ARCHIVE_FLAG}")
-        elif not shutil.which("proof-blueprint"):
-            err(f"{PROG}: {SPINE_ARCHIVE_FLAG} needs the `proof-blueprint` CLI on PATH")
-            return 1
-        else:
-            bp = find_blueprint(lean_root)
-            if not bp:
-                err(f"{PROG}: {SPINE_ARCHIVE_FLAG} needs a proof-blueprint project — "
-                    f"no .blueprint.toml at or above {lean_root}")
-                return 1
-            if not make_spine_archive(spine_archive, os.path.dirname(bp), lean_root):
-                return 1
 
     return exit_code
 

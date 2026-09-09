@@ -62,8 +62,8 @@ the project it rebuilt; the report explains this in its timing section.
 
 `examples/lake-build-example` is a self-contained Python script, based on the
 production wrapper, that keeps the parts behind the report's telemetry and
-drops the house-specific telemetry, spine archives, session identity, and hook
-deployment. It needs only Python 3 and a Lean toolchain on
+drops the house-specific telemetry, session identity, and hook deployment. It
+needs only Python 3 and a Lean toolchain on
 `PATH`. From anywhere inside a Lake project:
 
 ```

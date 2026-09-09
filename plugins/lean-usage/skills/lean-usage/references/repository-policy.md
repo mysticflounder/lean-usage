@@ -45,7 +45,7 @@ contract and durable closeout:
   gates (including whether builds, network, source refresh, or generated artifacts
   are allowed);
 - exact theorem statement, immediate consumer, exported/headline consumer, active
-  proof-spine residual, and closure measure;
+  residual, and closure measure;
 - repository axiom/native/external-evidence whitelist and publication command;
 - source/problem provenance record and any deliberate semantic delta.
 
@@ -92,11 +92,11 @@ Rules:
 
 Mathlib/FLT-bound code commonly puts adaptation provenance in the commit/PR record
 rather than ad hoc inline comments. Local projects may require a declaration
-docstring or blueprint citation. The destination repository decides.
+docstring or source citation. The destination repository decides.
 
 ## Formalization source literature
 
-Keep a local audit copy of every paper, thesis, blueprint, problem statement, or
+Keep a local audit copy of every paper, thesis, problem statement, or
 note that defines the formalization target under `docs/references/` (or the
 repository's documented equivalent). Record enough bibliographic information to
 identify the exact source and version.
