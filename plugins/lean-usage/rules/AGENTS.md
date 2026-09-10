@@ -8,4 +8,4 @@ House governance for Lean 4 theorem proving and builds.
 
 ## 2. Proof & Theorem Discipline
 - **Proof tracking**: Keep structured proof goals, assumptions, and tractability evidence explicit and reviewable.
-- **Promotion Policy**: Do not leave unverified `sorry` declarations in promoted proofs without an explicit tracking record.
+- **Promotion Policy**: A proof whose transitive dependencies include `sorryAx` or unapproved axioms must not be promoted. Tracking an unfinished obligation does not discharge it: label it `SKETCH — NOT PROMOTABLE`. Require a fresh final-consumer build, trust audit, and independent verification before promotion. See [rigor standards](../skills/lean-usage/references/rigor-standards.md).

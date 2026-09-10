@@ -140,6 +140,10 @@ its markers; do not hand-write a new policy summary.
 
 ## Evidence and claim scope
 
+Read [rigor-standards.md](references/rigor-standards.md) when assessing claims or
+reviewing whether evidence supports proof, verification, or promotion. These
+project-neutral standards apply alongside the destination's explicit trust policy.
+
 Use the rigor labels `PROVEN`, `CONJECTURED`, `EMPIRICALLY VERIFIED`, and `HEURISTIC`
 for claims. For computations, also state whether the result is exhaustive within a
 specified abstraction, externally exact, or sampled. Exhausting a finite abstraction
@@ -283,6 +287,7 @@ Read [code-quality.md](references/code-quality.md) for governed review gates,
 | Generated proofs, DRAT emitters, project olean archival | [generated-proofs.md](references/generated-proofs.md) |
 | Certificate-bank custody, reproducibility, verification, and handoff | [freezing-certificate-banks.md](references/freezing-certificate-banks.md) |
 | Promotion; provenance; `sorry`; axioms; case splits; native/external trust | [proof-discipline.md](references/proof-discipline.md) |
+| Project-neutral rigor, evidence labels, complete arguments, and independent review | [rigor-standards.md](references/rigor-standards.md) |
 | Compact policy for workers/reviewers that cannot load this skill | [worker-promotion-contract.md](references/worker-promotion-contract.md) |
 | Governed review gates, lints, naming/tone, and public API | [code-quality.md](references/code-quality.md) |
 | Headers, authorship, provenance, local literature | [repository-policy.md](references/repository-policy.md) |
