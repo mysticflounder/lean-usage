@@ -162,6 +162,9 @@ source and version, the formal declaration and statement, hypothesis-by-hypothes
 mapping, named final consumer, and any deliberate semantic delta. A chat transcript or
 scratch note is not a durable provenance record.
 
+Before freezing, replaying, archiving, or publishing a certificate bank, read
+[freezing-certificate-banks.md](references/freezing-certificate-banks.md).
+
 ## Build quick start
 
 ```bash
@@ -258,6 +261,7 @@ Read [code-quality.md](references/code-quality.md) for governed review gates,
 | Wrapper behavior, host sharing, raw Lean exceptions, mathlib cache | [build-operations.md](references/build-operations.md) |
 | Budgets, heartbeat policy, stats, and elaboration profiling | [build-performance.md](references/build-performance.md) |
 | Generated proofs, DRAT emitters, project olean archival | [generated-proofs.md](references/generated-proofs.md) |
+| Certificate-bank custody, reproducibility, verification, and handoff | [freezing-certificate-banks.md](references/freezing-certificate-banks.md) |
 | Promotion; provenance; `sorry`; axioms; case splits; native/external trust | [proof-discipline.md](references/proof-discipline.md) |
 | Compact policy for workers/reviewers that cannot load this skill | [worker-promotion-contract.md](references/worker-promotion-contract.md) |
 | Governed review gates, lints, naming/tone, and public API | [code-quality.md](references/code-quality.md) |
