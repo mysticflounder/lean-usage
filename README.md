@@ -73,6 +73,18 @@ path instead of overwriting local work.
 
 ## Skills
 
+### Companion Lean 4 plugin
+
+We use the `lean4` plugin from
+[mysticflounder/lean4-skills](https://github.com/mysticflounder/lean4-skills), a fork
+of [Cameron Freer's lean4-skills](https://github.com/cameronfreer/lean4-skills).
+Install it separately for general Lean proof development, tactic selection,
+proof-state inspection, and theorem search. This plugin complements it with build
+coordination, evidence and rigor standards, and project-governance guidance; the
+companion plugin is not bundled here. See its repository for installation instructions.
+
+### Included skills
+
 | Skill | Command | Description |
 |-------|---------|-------------|
 | Lean Usage | `/lean-usage:lean-usage` | House governance for Lean 4 repositories: the `lake-build` workflow, project-indexed theorem reuse, proof obligations and tractability, axiom/native/external-evidence trust audits, promotion and publication. References cover build operations, build performance, generated proofs, proof discipline, code quality, sharding, vendoring, and the worker promotion contract. |
