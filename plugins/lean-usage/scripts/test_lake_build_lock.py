@@ -89,6 +89,23 @@ class LakeBuildLockTests(unittest.TestCase):
             os.environ[name] = f" {name.lower()} "
             self.assertEqual(lake_build.calling_session()["sid"], name.lower())
 
+    def test_normalize_lockfile_anchors_relative_paths_to_invocation_cwd(self):
+        with tempfile.TemporaryDirectory() as directory:
+            invocation_cwd = Path(directory, "project", "work")
+            self.assertEqual(
+                lake_build.normalize_lockfile("lake-build.lock", str(invocation_cwd)),
+                os.path.abspath(str(invocation_cwd / "lake-build.lock")),
+            )
+            self.assertEqual(
+                lake_build.normalize_lockfile("../locks/./lake-build.lock", str(invocation_cwd)),
+                os.path.abspath(str(invocation_cwd / "../locks/./lake-build.lock")),
+            )
+            absolute_path = invocation_cwd / ".lake" / "lake-build.lock"
+            self.assertEqual(
+                lake_build.normalize_lockfile(str(absolute_path), str(Path(directory, "other"))),
+                os.path.abspath(str(absolute_path)),
+            )
+
     def test_acquire_lock_writes_pid_and_json_metadata(self):
         os.environ["CODEX_SESSION_ID"] = ' codex-"session\nsecond-line '
         os.environ["TMUX_PANE"] = " %1 "
@@ -245,7 +262,7 @@ class LakeBuildLockTests(unittest.TestCase):
         fake.chmod(0o755)
         return fake
 
-    def run_integration_build(self, exit_code, custom_lock):
+    def run_integration_build(self, exit_code, custom_lock, relative_lock=False):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             lean_root = base / "lean-root"
@@ -255,11 +272,21 @@ class LakeBuildLockTests(unittest.TestCase):
             tmp_dir = base / "tmp"
             tmp_dir.mkdir()
             lockfile = (base / "custom" / "wrapper.lock") if custom_lock else lean_root / ".lake" / "lake-build.lock"
+            if relative_lock:
+                lockfile = lean_root / "lake-build.lock"
+            lockfile_value = os.path.relpath(lockfile, lean_root) if relative_lock else str(lockfile)
+            expected_lockfile = (
+                Path(os.path.realpath(lean_root), lockfile_value)
+                if relative_lock else lockfile
+            )
+            if relative_lock:
+                self.assertEqual(lockfile_value, "lake-build.lock")
+                self.assertEqual(expected_lockfile, Path(os.path.realpath(lean_root), "lake-build.lock"))
             state_dir = base / "state"
             env = os.environ.copy()
             env.update({
                 "LEAN_ROOT": str(lean_root),
-                "LOCKFILE": str(lockfile),
+                "LOCKFILE": lockfile_value,
                 "LEAN_USAGE_STATE_DIR": str(state_dir),
                 "TMPDIR": str(tmp_dir),
                 "REAL_LAKE": str(fake_lake),
@@ -286,7 +313,7 @@ class LakeBuildLockTests(unittest.TestCase):
             self.assertEqual(metadata["tmux_pane"], "%integration")
             log_path = Path(metadata["build_log"])
             self.assertTrue(log_path.is_absolute())
-            self.assertEqual(log_path.parent, lockfile.parent / "lake-build-logs")
+            self.assertEqual(log_path.parent, expected_lockfile.parent / "lake-build-logs")
             self.assertTrue(log_path.exists())
             log_text = log_path.read_text(encoding="utf-8")
             self.assertIn("FAKE_LAKE_STDOUT_SENTINEL", log_text)
@@ -302,6 +329,9 @@ class LakeBuildLockTests(unittest.TestCase):
     def test_main_persists_build_log_and_stats_for_success_and_failure(self):
         self.run_integration_build(0, custom_lock=False)
         self.run_integration_build(7, custom_lock=True)
+
+    def test_main_accepts_relative_lockfile_end_to_end(self):
+        self.run_integration_build(0, custom_lock=False, relative_lock=True)
 
     def test_mathlib_cache_prefetch_runs_before_build_and_fails_closed(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -97,17 +97,17 @@ def extract_tool_and_command(data: dict) -> tuple[str, str, str]:
         tc = data["toolCall"]
         tname = tc.get("name", "")
         args = tc.get("args") or {}
-        cmd = args.get("CommandLine") or args.get("command") or ""
+        cmd = args.get("CommandLine") or args.get("command") or args.get("cmd") or ""
         return ("antigravity", tname, cmd)
     if "hook_event" in data and isinstance(data["hook_event"], dict):
         event = data["hook_event"]
         tname = event.get("tool_name", "")
         tinput = event.get("tool_input", {}) or {}
-        cmd = tinput.get("command") or tinput.get("CommandLine") or ""
+        cmd = tinput.get("command") or tinput.get("CommandLine") or tinput.get("cmd") or ""
         return ("codex", tname, cmd)
     tname = data.get("tool_name", "")
     tinput = data.get("tool_input", {}) or {}
-    cmd = tinput.get("command") or tinput.get("CommandLine") or ""
+    cmd = tinput.get("command") or tinput.get("CommandLine") or tinput.get("cmd") or ""
     return ("claude", tname, cmd)
 
 
@@ -119,15 +119,10 @@ def main():
 
     platform, tool_name, command = extract_tool_and_command(hook_input)
 
-    if tool_name not in ("Bash", "run_command"):
+    if tool_name not in ("Bash", "run_command", "exec_command"):
         return
 
     if not command:
-        return
-
-    # Going through the global `lake-build` wrapper (or a legacy lake-build.sh)
-    # is exactly what we want — never warn on those.
-    if "lake-build" in command:
         return
 
     commands = extract_commands(command)

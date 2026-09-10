@@ -76,6 +76,7 @@ Environment:
   MEMORY_MB             Requested per-`lean` memory limit, MB. Default 16384.
                         Applies only to invocations through the PATH shim.
   LOCKFILE              PID-lock path. Default <lake-root>/.lake/lake-build.lock.
+                        Relative values are resolved from the invocation cwd.
                         First line: PID; second line: JSON sid/tmux_pane/build_log.
   REAL_LAKE, REAL_LEAN  Explicit toolchain executables. Default: resolved on PATH.
   LEAN_USAGE_STATE_DIR  Stats directory. Default ~/.local/state/lean-usage.
@@ -167,6 +168,18 @@ def uses_mathlib(lean_root: str) -> bool:
         except OSError:
             pass
     return False
+
+
+def normalize_lockfile(value: str, cwd: str | None = None) -> str:
+    """Resolve a lock path once, so parent-directory operations are reliable.
+
+    ``LOCKFILE`` follows normal command-line path semantics: a relative value
+    is relative to the wrapper's invocation directory, while an absolute value
+    is preserved (apart from normalizing ``.``/``..`` components).
+    """
+    return os.path.abspath(value if os.path.isabs(value) else os.path.join(
+        cwd or os.getcwd(), value
+    ))
 
 
 # --- lockfile (stale-pid aware) -------------------------------------------
@@ -406,7 +419,10 @@ def main() -> int:
         return 1
 
     memory_mb = _env_int("MEMORY_MB", 16384)
-    lockfile = os.environ.get("LOCKFILE") or os.path.join(lean_root, ".lake", "lake-build.lock")
+    configured_lockfile = os.environ.get("LOCKFILE")
+    lockfile = normalize_lockfile(configured_lockfile) if configured_lockfile else os.path.join(
+        lean_root, ".lake", "lake-build.lock"
+    )
     real_lake = os.environ.get("REAL_LAKE") or shutil.which("lake")
     real_lean = os.environ.get("REAL_LEAN") or shutil.which("lean")
     if not real_lake or not real_lean:
@@ -452,7 +468,7 @@ def main() -> int:
     lean_shim = os.path.join(wrap_dir, "lean")
     with open(lean_shim, "w", encoding="utf-8") as fh:
         fh.write(
-            "#!/usr/bin/env bash\n"
+            "#!/bin/sh\n"
             f'exec "{real_lean}" -M "{memory_mb}" "$@"\n'
         )
     os.chmod(lean_shim, 0o755)

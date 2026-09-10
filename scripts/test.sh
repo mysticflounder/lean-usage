@@ -4,7 +4,7 @@
 # Author: Adam McKenna <adam@mysticflounder.ai>
 #
 # test.sh — run the repository checks: manifest version parity for every
-# plugin, then the lake-build wrapper's lock/shim/telemetry and edit-guard tests.
+# plugin, then the wrapper, edit-guard, and build-hook event regression tests.
 #
 # Usage:
 #   scripts/test.sh
@@ -14,3 +14,4 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT/plugins/lean-usage"
 uv run --no-project python scripts/test_lake_build_lock.py
 uv run --no-project python scripts/test_lake_build_edit_guard.py
+uv run --no-project python scripts/test_build_hooks.py

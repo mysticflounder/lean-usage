@@ -26,9 +26,9 @@ model-invoked skills.
 | Host/event | Hook behavior |
 |---|---|
 | Claude `SessionStart` | Keeps `~/.local/bin/lake-build` pointed at the active wrapper via [`sync-lake-build.py`](plugins/lean-usage/hooks/sync-lake-build.py). |
-| Claude `PreToolUse` (Bash) | Warns on direct `lake`/`lean` calls via [`lean-direct-warn.py`](plugins/lean-usage/hooks/lean-direct-warn.py) and denies recognized mathlib builds with a missing or stale cache via [`mathlib-cache-check.py`](plugins/lean-usage/hooks/mathlib-cache-check.py). |
+| Claude `PreToolUse` (Bash) | Warns on direct `lake`/`lean` calls via [`lean-direct-warn.py`](plugins/lean-usage/hooks/lean-direct-warn.py) and denies recognized raw mathlib builds with a missing or stale cache via [`mathlib-cache-check.py`](plugins/lean-usage/hooks/mathlib-cache-check.py). Managed wrapper calls proceed to their own cache prefetch. |
 | Codex `SessionStart` | Synchronizes the `lake-build` wrapper. |
-| Codex `PreToolUse` (Bash) | Applies the same direct-build warning and mathlib-cache guard. |
+| Codex `PreToolUse` (Bash, run_command, exec_command) | Applies the same direct-build warning and mathlib-cache guard. |
 | Claude and Codex `PreToolUse` (file edits, patches, shell commands) | [`protect-lake-build.py`](plugins/lean-usage/hooks/protect-lake-build.py) denies direct edits and recognized shell writes to the managed `~/.local/bin/lake-build`; edit the plugin source instead. |
 
 Claude registers these in [`hooks/hooks.json`](plugins/lean-usage/hooks/hooks.json);
@@ -85,8 +85,21 @@ Supported platforms are macOS and Linux. Windows support is intended, but has
 not yet been tested; please [open an issue](https://github.com/mysticflounder/lean-usage/issues)
 if you encounter a Windows-specific problem.
 
-Requirements: Python 3 through `uv`, `jq`, Lean 4 with Lake, and
-`lake exe cache` for mathlib projects.
+Requirements: `uv` for hook execution, Python 3.10+ with a `python3` executable
+on `PATH` for the directly invoked wrapper, a POSIX shell (`/bin/sh`), Lean 4 with Lake,
+and `lake exe cache` for mathlib projects. Repository checks also require
+Bash, `jq`, and Python 3.11+ (the tests use `contextlib.chdir`). Having a Python
+interpreter managed by `uv` alone does not guarantee that the wrapper's
+`#!/usr/bin/env python3` can find it.
+
+On macOS/Linux, put `~/.local/bin` on your host application's `PATH` before
+starting a session. SessionStart creates the wrapper symlink but does not edit
+your shell profile or the host's environment. Restart the host after changing
+its environment, then verify `command -v lake-build` and `lake-build --help`.
+If Python is available only through `uv`, invoke the wrapper explicitly as
+`uv run --no-project python <plugin-root>/bin/lake-build` instead. If the symlink
+cannot be installed (including on Windows), use that explicit invocation with
+the installed plugin path. Windows shell and hook integration remain untested.
 
 ## Tests
 
@@ -95,8 +108,9 @@ scripts/test.sh
 ```
 
 This checks that every plugin's Claude, Codex, and compatibility manifests carry
-the same version, then runs the wrapper's lock, shim, telemetry, and deployed-file
-edit-guard tests.
+the same version, then runs the wrapper's lock, shim, telemetry, deployed-file
+edit-guard, and build-hook event tests. Synthetic hook events do not replace
+live host integration testing.
 
 ## Provenance
 

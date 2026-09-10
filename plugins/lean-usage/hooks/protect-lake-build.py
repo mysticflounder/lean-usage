@@ -110,7 +110,9 @@ def extract_event(data: dict[str, Any]) -> tuple[str, str, dict[str, Any], str]:
         call = data["toolCall"]
         args = call.get("args") if isinstance(call.get("args"), dict) else {}
         workspaces = data.get("workspacePaths") or []
-        cwd = args.get("Cwd") or (workspaces[0] if workspaces else os.getcwd())
+        cwd = args.get("Cwd") or args.get("cwd") or args.get("workdir") or (
+            workspaces[0] if workspaces else os.getcwd()
+        )
         return "antigravity", str(call.get("name", "")), args, str(cwd)
 
     if isinstance(data.get("hook_event"), dict):
@@ -118,13 +120,27 @@ def extract_event(data: dict[str, Any]) -> tuple[str, str, dict[str, Any], str]:
         tool_input = event.get("tool_input")
         if not isinstance(tool_input, dict):
             tool_input = {}
-        cwd = event.get("cwd") or data.get("cwd") or os.getcwd()
+        cwd = (
+            tool_input.get("cwd")
+            or tool_input.get("workdir")
+            or event.get("cwd")
+            or event.get("workdir")
+            or data.get("cwd")
+            or data.get("workdir")
+            or os.getcwd()
+        )
         return "codex", str(event.get("tool_name", "")), tool_input, str(cwd)
 
     tool_input = data.get("tool_input")
     if not isinstance(tool_input, dict):
         tool_input = {}
-    cwd = data.get("cwd") or tool_input.get("cwd") or os.getcwd()
+    cwd = (
+        tool_input.get("cwd")
+        or tool_input.get("workdir")
+        or data.get("cwd")
+        or data.get("workdir")
+        or os.getcwd()
+    )
     return "claude", str(data.get("tool_name", "")), tool_input, str(cwd)
 
 
@@ -347,7 +363,12 @@ def main() -> None:
         )
         blocked = isinstance(command, str) and patch_touches_protected(command, cwd)
     elif lowered in {"bash", "run_command", "exec_command"}:
-        command = tool_input.get("command") or tool_input.get("CommandLine") or ""
+        command = (
+            tool_input.get("command")
+            or tool_input.get("CommandLine")
+            or tool_input.get("cmd")
+            or ""
+        )
         blocked = isinstance(command, str) and shell_touches_protected(command, cwd)
 
     if blocked:

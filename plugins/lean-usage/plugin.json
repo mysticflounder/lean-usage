@@ -1,6 +1,6 @@
 {
   "name": "lean-usage",
-  "version": "0.1.68",
+  "version": "0.1.69",
   "description": "Lean 4 build and proof tooling: lake-build governance, lean-shard, and DRAT-to-Lean.",
   "author": {
     "name": "Adam McKenna",

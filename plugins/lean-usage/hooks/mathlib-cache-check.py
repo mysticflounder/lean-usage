@@ -7,7 +7,7 @@
 #
 # Usage:
 #   Configured as a PreToolUse hook; reads hook event JSON from stdin.
-"""mathlib-cache-check.py — Block `lake build` / `lake env lean` / `lake-build` when
+"""mathlib-cache-check.py — Block raw `lake build` / `lake env lean` when
 the project depends on mathlib but `lake exe cache get` has not been run for it.
 
 Two ways the cache can be unusable:
@@ -22,6 +22,7 @@ Codex CLI (nested hook_event payload).
 """
 import json
 import os
+import re
 import shlex
 import sys
 from pathlib import Path
@@ -57,18 +58,44 @@ def split_statements(command_str):
 
 
 def is_build_invocation(tokens):
-    """True iff tokens contain `lake build`, `lake env lean`, or a `lake-build` / `lake-build.sh` invocation."""
-    for i, tok in enumerate(tokens):
-        basename = os.path.basename(tok)
-        if basename in ("lake-build", "lake-build.sh"):
-            return True
-        if basename == "lake" and i + 1 < len(tokens):
-            sub = tokens[i + 1]
-            if sub == "build":
-                return True
-            if sub == "env" and i + 2 < len(tokens) and tokens[i + 2] == "lean":
-                return True
-    return False
+    """True iff one statement starts a raw `lake build`/`lake env lean` call.
+
+    The ``lake-build`` wrapper performs its own fail-closed cache prefetch, so
+    it must not be blocked by this hook.  Inspect only the command position:
+    ``echo lake-build`` is harmless, while a later raw build in a compound
+    command is still seen because callers invoke this once per statement.
+    """
+    if not tokens:
+        return False
+
+    index = 0
+    while index < len(tokens) and re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", tokens[index]):
+        index += 1
+    if index >= len(tokens):
+        return False
+
+    executable = os.path.basename(tokens[index])
+    if executable in {"env", "command"}:
+        index += 1
+        while index < len(tokens) and (
+            tokens[index].startswith("-")
+            or re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", tokens[index])
+        ):
+            index += 1
+        if index >= len(tokens):
+            return False
+        executable = os.path.basename(tokens[index])
+    if executable in ("lake-build", "lake-build.sh"):
+        return False
+    if executable != "lake":
+        return False
+
+    args = tokens[index + 1:]
+    if not args:
+        return False
+    if args[0] == "build":
+        return True
+    return args[:2] == ["env", "lean"]
 
 
 def is_cd(tokens):
@@ -204,20 +231,34 @@ def extract_tool_info(data: dict) -> tuple[str, str, str, str]:
         tc = data["toolCall"]
         tname = tc.get("name", "")
         args = tc.get("args") or {}
-        cmd = args.get("CommandLine") or args.get("command") or ""
+        cmd = args.get("CommandLine") or args.get("command") or args.get("cmd") or ""
         cwd = args.get("Cwd") or (data.get("workspacePaths") or [os.getcwd()])[0]
         return ("antigravity", tname, cmd, cwd)
     if "hook_event" in data and isinstance(data["hook_event"], dict):
         event = data["hook_event"]
         tname = event.get("tool_name", "")
         tinput = event.get("tool_input", {}) or {}
-        cmd = tinput.get("command") or tinput.get("CommandLine") or ""
-        cwd = event.get("cwd") or data.get("cwd") or os.getcwd()
+        cmd = tinput.get("command") or tinput.get("CommandLine") or tinput.get("cmd") or ""
+        cwd = (
+            tinput.get("cwd")
+            or tinput.get("workdir")
+            or event.get("cwd")
+            or event.get("workdir")
+            or data.get("cwd")
+            or data.get("workdir")
+            or os.getcwd()
+        )
         return ("codex", tname, cmd, cwd)
     tname = data.get("tool_name", "")
     tinput = data.get("tool_input", {}) or {}
-    cmd = tinput.get("command") or tinput.get("CommandLine") or ""
-    cwd = data.get("cwd") or tinput.get("cwd") or os.getcwd()
+    cmd = tinput.get("command") or tinput.get("CommandLine") or tinput.get("cmd") or ""
+    cwd = (
+        tinput.get("cwd")
+        or tinput.get("workdir")
+        or data.get("cwd")
+        or data.get("workdir")
+        or os.getcwd()
+    )
     return ("claude", tname, cmd, cwd)
 
 
@@ -232,7 +273,7 @@ def main():
 
     platform, tool_name, command, cwd = extract_tool_info(hook_input)
 
-    if tool_name not in ("Bash", "run_command"):
+    if tool_name not in ("Bash", "run_command", "exec_command"):
         return
 
     if not command:

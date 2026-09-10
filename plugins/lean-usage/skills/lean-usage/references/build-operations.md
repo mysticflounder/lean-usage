@@ -64,11 +64,14 @@ wrapper. A host runs a plugin hook only after the user trusts it, so on a host w
 hooks are untrusted or the plugin is disabled nothing installs the wrapper. If the
 bare name is not found:
 
-- run the plugin's own copy at `<plugin-root>/bin/lake-build`;
+- run the plugin's own copy at `<plugin-root>/bin/lake-build` (requires `python3`
+  on `PATH`), or `uv run --no-project python <plugin-root>/bin/lake-build`;
 - or symlink that file into a directory on `PATH`;
 - or trust the plugin's hooks and start a new session.
 
-Also confirm that `~/.local/bin` is on `PATH`. Every rule in this skill that names
+Also confirm that `~/.local/bin` is on the host application's `PATH`; SessionStart
+does not edit shell profiles or change the host environment. Restart the host
+after updating its environment. Every rule in this skill that names
 `lake-build` applies to whichever of these entry points is in use.
 
 The `protect-lake-build` PreToolUse hook denies file edits, patches, and recognized
@@ -191,11 +194,12 @@ reported decompression result and the actual `.lake/packages/mathlib` build tree
 as the check; do not charge a cold from-source mathlib compile to the project's
 normal build budget.
 
-The plugin also ships a pre-tool hook that denies a recognized build or direct-Lean
+The plugin also ships a pre-tool hook that denies a recognized raw build or direct-Lean
 command when the mathlib cache is empty or its oleans predate the pinned toolchain.
 That hook runs only where the user trusted the plugin's hooks, so treat it as a
-convenience, not as the guarantee. The wrapper's own prefetch is the part that always
-runs.
+convenience, not as the guarantee. Managed `lake-build` invocations are allowed
+through so their own fail-closed prefetch can repair an empty or stale cache.
+The wrapper's own prefetch is the part that always runs.
 
 `LEAN_USAGE_SKIP_CACHE_CHECK=1` disables that hook alone. It does not affect the
 wrapper, whose prefetch stays fail-closed. For a deliberate mathlib source compile,
