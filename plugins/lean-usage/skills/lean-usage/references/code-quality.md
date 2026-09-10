@@ -54,7 +54,9 @@ merely to silence a linter.
 Name namespaces, definitions, and theorems after mathematics, not the tool,
 daemon, script, certificate format, or pipeline that produced them.
 
-- Prefer `namespace E677.PadicShift` over `namespace Piqd.PadicShift`.
+- Name the namespace for the mathematics, not for the pipeline that produced the
+  declarations: prefer `namespace Diophantine.PadicShift` over
+  `namespace SolverPipeline.PadicShift`.
 - A generated instance may use a stable parameter/hash suffix, but it should
   instantiate or apply a math-named theorem.
 - Fix tool-flavored generated names at the emitter.
@@ -89,9 +91,9 @@ for the mathematical object, not the software/pipeline metaphor that carried it.
   math terms already in use (`Surplus`, `Anchor`, coordinate `Frame`) rather
   than renaming for its own sake.
 - **Conform to a project's locked naming glossary when one exists.** When a
-  repository maintains a de-jargonification map or naming glossary (e.g.
-  erdos-97-96's `docs/de-jargonification-map-*.md`), a new declaration must use
-  the standardized term, never reintroduce a token the glossary has retired.
+  repository maintains a de-jargonification map or naming glossary (for example a
+  `docs/de-jargonification-map-*.md` file), a new declaration must use the
+  standardized term, never reintroduce a token the glossary has retired.
 
 Use neutral, audit-friendly status language. State what is proved, open, exact
 within a model, or conjectural. Avoid dramatic obstruction names and difficulty

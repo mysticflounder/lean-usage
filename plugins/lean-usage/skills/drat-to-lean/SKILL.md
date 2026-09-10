@@ -1,11 +1,11 @@
 ---
 name: drat-to-lean
-description: "Run the DRAT-to-Lean pipeline in ~/the-missing-pair: encode a magma non-existence claim to CNF, solve with CaDiCaL, trim to LRAT, and emit a kernel-checked Lean 4 proof. Use when producing a Lean-verified UNSAT proof from CNF or reproducing or extending the E255/E677-style proofs."
+description: "Run the DRAT-to-Lean pipeline in ~/the-missing-pair: encode a magma non-existence claim to CNF, solve with CaDiCaL, trim to LRAT, and emit a Lean 4 proof. Depth-1 output is kernel-checked with `propext` as its only axiom; deeper output can still contain `sorry`, so audit the axioms before you promote it. Use when producing a Lean-verified UNSAT proof from CNF or reproducing or extending the E255/E677-style proofs."
 ---
 
 # drat-to-lean
 
-Six-stage pipeline that turns a magma/Latin-square non-existence claim into a Lean 4 theorem whose only axioms are `propext`:
+Six-stage pipeline that turns a magma/Latin-square non-existence claim into a Lean 4 theorem. At depth 1 the emitted theorem closes with `propext` as its only axiom; deeper proofs can still carry `sorry` (see [Lean output](#lean-output)):
 
 ```
 encode_cnf  →  cadical  →  drat-trim  →  pipeline.run_pipeline_from_cnf  →  emit_lean  →  lake env lean
@@ -59,7 +59,7 @@ scripts/drat_to_lean.py 7 \
 | 3 | Trim to LRAT | `drat-trim <cnf> <drat> -L <lrat> -c <core.cnf>` (expect `s VERIFIED`) |
 | 4 | Parse proof | `drat_reader.pipeline.run_pipeline_from_cnf()` — builds the DAG, attributes clauses |
 | 5 | Emit Lean | `emit_lean()` → `lean/scratch/DratGap0D<d>.lean` by default |
-| 6 | Verify | `lake env lean <path>` — success = kernel-checked proof |
+| 6 | Verify | `lake env lean <path>` — elaboration only. A file with `sorry` still elaborates, so `#print axioms` decides whether the proof is kernel-checked |
 
 ## Variable encoding
 
@@ -131,5 +131,3 @@ lake env lean lean/scratch/DratGap0D7.lean
 - `drat_reader/pipeline.py`, `drat_reader/trim.py`, `drat_reader/emit_lean.py` — proof parsing + Lean codegen
 - `docs/2026-04-18-cadical-usage-cleanup.md` — the recent sweep's findings
 - `lean/scratch/` — generated theorems live here
-
-<!-- created_from: 752c93d -->

@@ -71,17 +71,20 @@ bound or be refactored unless the repository records a specific exception.
 ```
 
 Override the directory with `LEAN_USAGE_STATE_DIR`. A record contains timestamp,
-Lake root, arguments, duration, exit code, targets recompiled, memory cap, a
-`build_id`, and `interrupted`. `recompiled` is the count of `✔ [k/n] Built …`
-progress lines — `0` marks a fully-cached no-op (Lake is content-hash based),
-distinguishing a fast cached build from a fast real one. `interrupted` is `true`
+Lake root, arguments, duration, exit code, an activity count, memory cap, a
+`build_id`, the build-log path, and `interrupted`. `recompiled` counts Lake's build-activity lines —
+`Built`, `Building`, and `Compiling`, with or without warnings. It is an activity
+count, not a count of distinct modules: one module can contribute more than one
+line. `0` marks a fully-cached no-op (Lake is content-hash based), distinguishing
+a fast cached build from a fast real one. For a module count, use the
+`module-build-stats.jsonl` rows that carry the same `build_id`. `interrupted` is `true`
 when the build was stopped by a signal (Ctrl-C / SIGTERM) before Lake returned;
 such a record is partial — `duration_s` is the elapsed time so far, `exit_code`
 is `128 + signum`, and `recompiled` counts only what finished. Records written
 before a field was added omit it.
 
 ```json
-{"ts":"2026-06-21T18:03:11Z","project":"/path/to/lean","args":"lake build Foo","duration_s":742,"exit_code":0,"recompiled":38,"memory_mb":16384,"build_id":"12345-1785209288","interrupted":false}
+{"ts":"2026-06-21T18:03:11Z","project":"/path/to/lean","args":"lake build Foo","duration_s":742,"exit_code":0,"recompiled":38,"memory_mb":16384,"build_id":"12345-1785209288","build_log":"/path/to/lean/.lake/lake-build-logs/12345-1785209288.log","interrupted":false}
 ```
 
 Each wrapper invocation writes one line, but different projects are not protected
@@ -175,6 +178,9 @@ Good shard boundaries:
 
 Also inspect broad imports before multiplying tiny files: import-bound shards can
 make total CPU worse even if wall-clock parallelism improves.
+
+For the mechanics of a split — rendered-byte budgets, block boundaries, the
+manifest, re-sharding, and validation — read [sharding.md](sharding.md).
 
 ## A/B method
 

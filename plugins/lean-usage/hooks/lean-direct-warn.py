@@ -7,7 +7,7 @@
 #
 # Usage:
 #   Configured as a PreToolUse hook; reads hook event JSON from stdin.
-"""lean-direct-warn.py — Warn when lake or lean is called directly instead of via lake-build.sh.
+"""lean-direct-warn.py — Warn when lake or lean is called directly instead of via lake-build.
 Handles both Claude Code (flat payload) and Codex CLI (nested hook_event payload).
 """
 import json

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lean Usage"
+  short_description: "House Lean 4 build, proof, and promotion governance"
+  default_prompt: "Use $lean-usage for the house lake-build workflow, theorem reuse, proof obligations, and promotion audits."

@@ -3,9 +3,9 @@
 This is the canonical house promotion contract. Use it when changing open
 obligations, decomposing a proof, reusing mined/archived Lean, relying on
 computation, or claiming that a declaration is ready for a final consumer.
-For workers that cannot load this full reference, embed the mechanically checked
-[compact worker/promotion contract](worker-promotion-contract.md) rather than a
-hand-maintained summary.
+For workers that cannot load this full reference, embed the
+[compact worker/promotion contract](worker-promotion-contract.md) verbatim rather than
+a hand-maintained summary.
 
 ## Contents
 

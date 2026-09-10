@@ -46,14 +46,18 @@ project. Otherwise use the repository's documented search facilities:
 rg -n "<terms>" .
 ```
 
-`nthdegree docs search --lean` is the CROSS-PROJECT route — mathlib and every other
-configured Lean corpus, from any directory:
+For the CROSS-PROJECT route, use a semantic search tool over the Lean corpora when
+the host has one. This plugin does not ship one. With `nthdegree`, one command
+searches mathlib and every other configured Lean corpus from any directory:
 
 ```bash
 nthdegree docs search --lean "<statement or mathematical concept>"
 nthdegree docs search --lean --name '<name-pattern>' "<concept>"
 nthdegree docs search --lean --sig '<type fragment>' "<concept>"
 ```
+
+Without such a tool, search the project's own mathlib checkout under
+`.lake/packages/mathlib` with the repository's documented facilities.
 
 Use both project terminology and concept-level mathematical language. Treat every
 search hit as a candidate until the reuse preflight below passes.
@@ -81,8 +85,9 @@ may continue without restarting semantic search. Re-run the reuse preflight only
 when the candidate statement, ingress, consumer, imports, or relevant source
 revision materially changes.
 
-This reuse preflight is separate from the CEGAR wave-boundary checkpoint, which
-is restricted to current-wave data.
+A project may define its own iteration-scoped search checkpoint whose evidence is
+limited to the current iteration. That checkpoint and this reuse preflight are
+separate gates; passing one does not satisfy the other.
 
 ## Proof obligations and tractability
 
@@ -94,8 +99,8 @@ is restricted to current-wave data.
   not evidence that a new mathematical lemma is necessary.
 - Before production mathematical proof or Lean promotion work, read the relevant
   docs and active closure plan. Require plan coverage for every current
-  headline/publish-reachable `sorry`. If an anchored `sorry` is uncovered, stop
-  and ask. This gate does not apply to configuration, repository audits, or other
+  headline/publish-reachable `sorry`. If one of them is uncovered by the plan,
+  stop and ask. This gate does not apply to configuration, repository audits, or other
   non-proof maintenance. Scratch theorem proving is still proof work, not
   maintenance; while coverage is missing, continue only the read-only source and
   plan audit needed to resolve it.
@@ -132,9 +137,9 @@ is restricted to current-wave data.
 
 Read [proof-discipline.md](references/proof-discipline.md) before changing obligations,
 using `native_decide`, importing archived/mined Lean, or evaluating solver evidence.
-When a worker cannot load this skill, inject the byte-checked compact
-[worker/promotion contract](references/worker-promotion-contract.md); do not hand-write
-a new policy summary.
+When a worker cannot load this skill, copy the compact
+[worker/promotion contract](references/worker-promotion-contract.md) verbatim between
+its markers; do not hand-write a new policy summary.
 
 ## Evidence and claim scope
 
@@ -171,9 +176,21 @@ Before freezing, replaying, archiving, or publishing a certificate bank, read
 lake-build                 # whole project
 lake-build Foo.Bar         # one target
 lake-build --jobs 4        # forwarded to `lake build`; advisory, not a hard cap
+```
 
+`lake-build` reaches `PATH` through the plugin's SessionStart hook, and a host runs a
+plugin hook only when the user trusts it. Do not assume the wrapper is installed. If
+the bare name is not found, run the plugin's own `bin/lake-build` by path, or symlink
+it into a directory on `PATH`; see
+[build-operations.md](references/build-operations.md#lake-build).
+
+In a mathlib project the wrapper runs `lake exe cache get` itself and refuses to build
+from source when that prefetch fails. Run the cache command by hand only for a build
+that does not go through the wrapper:
+
+```bash
 cd <lake-root>
-lake exe cache get         # mathlib oleans; per project
+lake exe cache get         # only without lake-build; mathlib oleans, per project
 ```
 
 Honor repository heartbeat caps. Profile and refactor/split first; use only the
@@ -182,8 +199,9 @@ is exceptional generated/certificate policy, never a default, and
 `synthInstance.maxHeartbeats` is a distinct typeclass-synthesis budget. Read the
 full [heartbeat policy](references/build-performance.md#heartbeat-policy).
 
-`lake-build` locates the Lake root, serializes top-level builds per project, caps each
-Lean worker's memory, records timing, and cleans up its lock/shim. Build status and
+`lake-build` locates the Lake root, serializes top-level builds per project, prefetches
+the mathlib cache, caps each Lean worker's memory, records timing, and cleans up its
+lock/shim. Build status and
 publication records are project-owned; follow the project's own refresh commands and
 gates when they exist.
 
@@ -267,4 +285,5 @@ Read [code-quality.md](references/code-quality.md) for governed review gates,
 | Governed review gates, lints, naming/tone, and public API | [code-quality.md](references/code-quality.md) |
 | Headers, authorship, provenance, local literature | [repository-policy.md](references/repository-policy.md) |
 | Mathlib/FLT style and pre-review audit | [mathlib-flt-idiom.md](references/mathlib-flt-idiom.md) |
+| Splitting one oversized module into shards plus a coordinator | [sharding.md](references/sharding.md) |
 | Lake dependency pins, local paths, mirrors | [vendoring.md](references/vendoring.md) |

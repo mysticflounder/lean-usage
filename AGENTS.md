@@ -25,9 +25,10 @@ or treat this repository as the publication copy.
 | Marketplace manifest (Codex) | `.agents/plugins/marketplace.json` |
 | Plugin manifest (Claude) | `plugins/<plugin>/.claude-plugin/plugin.json` |
 | Plugin manifest (Codex) | `plugins/<plugin>/.codex-plugin/plugin.json` |
+| Plugin manifest (compatibility copy) | `plugins/<plugin>/plugin.json` — same content as the Claude manifest |
 | Plugin skills | `plugins/<plugin>/skills/<name>/SKILL.md` (+ `references/`) |
 | Plugin hooks (Claude) | `plugins/lean-usage/hooks/*.py` + `plugins/lean-usage/hooks/hooks.json` |
-| Plugin hooks (Codex) | `plugins/lean-usage/codex-hooks.json` (absolute paths; edit for your checkout) |
+| Plugin hooks (Codex) | `plugins/lean-usage/codex-hooks.json` (paths resolve through `${PLUGIN_ROOT}`; no checkout-specific edit) |
 | The `lake-build` wrapper | `plugins/lean-usage/bin/lake-build` (deployed to `~/.local/bin/lake-build` by the SessionStart hook) |
 | Wrapper tests | `plugins/lean-usage/scripts/test_lake_build_lock.py` |
 | Engineering report | `docs/reports/2026-09-07-lean-optimization-report.md` (+ `.pdf`, `assets/`) |
@@ -35,10 +36,11 @@ or treat this repository as the publication copy.
 
 ## Rules
 
-- **Bump the `version` in BOTH plugin manifests** to the same value whenever a
-  plugin's hooks, scripts, or skills change, and keep them equal.
-  `scripts/check-manifest-versions.sh` reports drift; `--fix` resyncs Codex to
-  Claude.
+- **Bump the `version` in EVERY plugin manifest** to the same value whenever a
+  plugin's hooks, scripts, or skills change, and keep them equal: the Claude
+  manifest, the Codex manifest, and the compatibility copy at the plugin root.
+  `scripts/check-manifest-versions.sh` reports drift; `--fix` resyncs the other
+  two to Claude.
 - **The file the `hooks` key names must be committed.**
 - Builds in Lean projects go through `lake-build`, never raw `lake build` or
   `lean`; the `lean-direct-warn` hook enforces this.

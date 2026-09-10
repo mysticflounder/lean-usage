@@ -60,7 +60,8 @@ high-leverage changes:
 5. **Hoist repeated instances.** When typeclass inference is hot, bind stable
    `DecidableEq`/`Decidable` instances once or simplify the generated value type.
 6. **Shard large proof terms.** Emit certificate-step or clause-batch lemmas into
-   separate modules and compose them with a thin coordinator.
+   separate modules and compose them with a thin coordinator. Follow the split
+   contract in [sharding.md](sharding.md).
 7. **Scope resource overrides.** Follow the full
    [heartbeat policy](build-performance.md#heartbeat-policy). Prefer a measured finite
    declaration-local limit. Keep `maxHeartbeats 0` only for an exceptional,

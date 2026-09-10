@@ -30,11 +30,15 @@ It:
 - uses a stale-PID-aware lock at `<lake-root>/.lake/lake-build.lock` to prevent
   concurrent top-level builds in the same project;
 - puts a temporary `lean` shim on `PATH` to inject the per-worker memory cap;
+- runs `lake exe cache get` first in a mathlib project and refuses the build when
+  that prefetch fails, so an ordinary invocation never becomes a mathlib source
+  compile;
 - records one per-build timing record per invocation, plus one per-module record
   (build time, warnings flag) read from Lake's `Built <module> (Ns)` output, and
   always removes its shim/lock — a signal interrupt still writes a partial
   per-build record and keeps the per-module records for modules already finished
-  (see build-performance for the two JSONL files);
+  (see build-performance for the two JSONL files).
+
 ## Environment overrides
 
 | Variable | Effect |
@@ -46,11 +50,22 @@ It:
 | `LEAN_USAGE_STATE_DIR` | Stats directory; default `~/.local/state/lean-usage`. |
 | `LAKE_BUILD_TARGET_S`, `LAKE_BUILD_CEIL_S` | Warning thresholds; defaults `600` and `1800`. They configure nudges, not a universal project policy. |
 | `LAKE_BUILD_NO_MODULE_STATS` | Skip writing per-module timing records to `module-build-stats.jsonl` (the per-build `build-stats.jsonl` is still written). |
-| `LEAN_USAGE_SKIP_CACHE_CHECK=1` | Bypass the pre-build mathlib-cache guard for a deliberate source build. |
+| `LEAN_USAGE_SKIP_CACHE_CHECK=1` | Turn off the plugin's cache-guard hook. It does not change the wrapper's own prefetch. |
 
-If `lake-build` is missing from `PATH`, restart a session with the plugin enabled
-and ensure `~/.local/bin` is on `PATH`. The plugin's session hook maintains the
-symlink to the active cached wrapper.
+`LEAN_USAGE_SKIP_CACHE_CHECK` is read by the plugin's cache-guard hook. Every other
+variable in the table is read by the wrapper itself.
+
+The plugin's SessionStart hook keeps `~/.local/bin/lake-build` pointed at the active
+wrapper. A host runs a plugin hook only after the user trusts it, so on a host where
+hooks are untrusted or the plugin is disabled nothing installs the wrapper. If the
+bare name is not found:
+
+- run the plugin's own copy at `<plugin-root>/bin/lake-build`;
+- or symlink that file into a directory on `PATH`;
+- or trust the plugin's hooks and start a new session.
+
+Also confirm that `~/.local/bin` is on `PATH`. Every rule in this skill that names
+`lake-build` applies to whichever of these entry points is in use.
 
 ## Limits and concurrency
 
@@ -144,6 +159,12 @@ build wrapper is not.
 
 ## Mathlib cache
 
+`lake-build` runs `lake exe cache get` itself before a build in a mathlib project and
+refuses to build from source when that prefetch fails. Through the wrapper, no manual
+cache step is needed.
+
+Run the command by hand for a build that does not go through the wrapper: a raw
+`lake build`, a `lake env lean` session, or a host where the wrapper is not installed.
 From the directory containing the lakefile:
 
 ```bash
@@ -156,9 +177,15 @@ reported decompression result and the actual `.lake/packages/mathlib` build tree
 as the check; do not charge a cold from-source mathlib compile to the project's
 normal build budget.
 
-The plugin's pre-tool hook blocks recognized build/direct-Lean commands when a
-mathlib dependency has no populated cache. Use `LEAN_USAGE_SKIP_CACHE_CHECK=1`
-only when a source compile is intentional and its cost has been accepted.
+The plugin also ships a pre-tool hook that denies a recognized build or direct-Lean
+command when the mathlib cache is empty or its oleans predate the pinned toolchain.
+That hook runs only where the user trusted the plugin's hooks, so treat it as a
+convenience, not as the guarantee. The wrapper's own prefetch is the part that always
+runs.
+
+`LEAN_USAGE_SKIP_CACHE_CHECK=1` disables that hook alone. It does not affect the
+wrapper, whose prefetch stays fail-closed. For a deliberate mathlib source compile,
+call `lake build` directly, with the project's authorization for that cost.
 
 For project-generated artifacts, read
 [generated-proofs.md](generated-proofs.md). For dependency pinning and toolchain

@@ -1,10 +1,11 @@
 # Lean worker and promotion contract
 
 This compact block is the canonical load-bearing contract for Lean proof workers and
-promotion reviewers that cannot load the full `lean-usage` skill. If a copy is ever
-embedded elsewhere, keep it byte-for-byte identical between its markers. (The former
-agent-smith mirror and its `check-lean-worker-contract.sh` sync check were retired
-to the `attic` plugin on 2026-08-14.)
+promotion reviewers that cannot load the full `lean-usage` skill. A copy embedded
+elsewhere must stay byte-for-byte identical to the text between the markers below.
+
+No automated check enforces that today. Copy the block, do not retype or summarize it,
+and re-copy every embedded mirror when the version in the marker changes.
 
 <!-- BEGIN LEAN-WORKER-PROMOTION-CONTRACT v1 -->
 ## Lean worker and promotion contract
