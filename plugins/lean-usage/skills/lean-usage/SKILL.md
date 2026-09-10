@@ -179,7 +179,7 @@ lake-build Foo.Bar         # one target
 lake-build --jobs 4        # forwarded to `lake build`; advisory, not a hard cap
 ```
 
-Use the absolute wrapper command supplied by the trusted SessionStart hook in
+Use the absolute wrapper command supplied by the SessionStart hook in
 place of the `lake-build` shorthand above. It uses a working Python interpreter
 and does not depend on `~/.local/bin` or `python3` being on `PATH`. Do not ask the
 user to change `PATH`. If hooks are disabled, use

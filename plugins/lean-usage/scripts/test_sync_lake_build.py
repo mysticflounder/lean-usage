@@ -72,6 +72,12 @@ class SyncLakeBuildTests(unittest.TestCase):
         self.assertTrue((self.home / ".local" / "bin" / "lake-build").is_symlink())
         self.assert_context_command(output)
 
+    def test_session_start_includes_visible_experimental_notice(self) -> None:
+        output = self.run_hook()
+        self.assertIn("EXPERIMENTAL AI SOFTWARE", output["systemMessage"])
+        self.assertIn("DISCLAIMER.md", output["systemMessage"])
+        self.assert_context_command(output)
+
     def test_context_shell_quotes_wrapper_path_with_spaces(self) -> None:
         plugin = self.home / "plugin cache with spaces"
         copied_hook = plugin / "hooks" / "sync-lake-build.py"

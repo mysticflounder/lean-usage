@@ -73,11 +73,17 @@ def install_symlink() -> bool:
 def emit_session_context() -> None:
     command = direct_wrapper_command()
     output = {
+        "systemMessage": (
+            "lean-usage: EXPERIMENTAL AI SOFTWARE — use at your own risk. "
+            "Hooks can execute commands and change local files. No warranty; "
+            "liability limitations apply where permitted by law. "
+            "Read the plugin's DISCLAIMER.md; keep backups and verify results."
+        ),
         "hookSpecificOutput": {
             "hookEventName": "SessionStart",
             "additionalContext": (
                 "When project policy authorizes a Lean/Lake build, use this "
-                "PATH-independent command (append target arguments as needed):\n"
+                "absolute-path wrapper invocation (append target arguments as needed):\n"
                 f"```sh\n{command}\n```"
             ),
         }

@@ -1,5 +1,12 @@
 # lean-usage
 
+> **WARNING: EXPERIMENTAL AI SOFTWARE — USE AT YOUR OWN RISK.** This early-alpha
+> plugin includes AI-assisted code and instructions that can be wrong or unsafe.
+> Hooks can execute commands and change local files automatically. To the fullest
+> extent permitted by law, no warranty is provided and liability is disclaimed.
+> Review the [risk notice and full disclaimer](plugins/lean-usage/DISCLAIMER.md)
+> before installation or use. Keep backups and independently verify all results.
+
 Lean 4 build governance for AI coding agents, packaged as a Claude Code and
 Codex plugin marketplace, together with the engineering report that documents
 what these conventions did for Lean build throughput across several
@@ -51,7 +58,15 @@ Codex registers them in [`codex-hooks.json`](plugins/lean-usage/codex-hooks.json
 The hook commands use `uv` and the host-provided plugin root, so they do not
 depend on Homebrew or a fixed checkout path.
 
-Hooks run only when enabled and trusted by the user. The edit guard recognizes
+Claude Code runs these hooks automatically when the installed plugin is enabled;
+there is no separate per-hook approval step. Codex applies its hook trust and
+enablement controls. Installing/enabling the plugin in Claude therefore enables
+the command execution and local-file effects described above, including the
+SessionStart symlink. See [Claude's plugin hook reference](https://code.claude.com/docs/en/plugins-reference#hooks).
+SessionStart also emits an experimental-software warning through the host's
+hook message output; this is a notice, not an approval prompt.
+
+The edit guard recognizes
 common write operations; it is a workflow aid, not an operating-system security
 boundary. SessionStart preserves an unexpected regular file at the deployment
 path instead of overwriting local work.
@@ -120,8 +135,8 @@ Requirements: `uv` with Python 3.10+, a POSIX shell (`/bin/sh`), Lean 4 with Lak
 and `lake exe cache` for mathlib projects. Repository checks also require
 Bash, `jq`, and Python 3.11+ (the tests use `contextlib.chdir`).
 
-No `PATH` or shell-profile changes are required for the wrapper. When hooks are
-trusted, SessionStart supplies the agent with a command using the absolute paths
+No `PATH` or shell-profile changes are required for the wrapper. When SessionStart
+runs, it supplies the agent with a command using the absolute paths
 of its working Python interpreter and the installed wrapper. The optional symlink
 is only a convenience; a missing symlink or missing `~/.local/bin` on `PATH` does
 not prevent the supplied command from working. For hook-disabled sessions, use
@@ -161,7 +176,8 @@ to the files in this repository.
 
 ## License
 
-GPL-3.0-or-later. See [LICENSE](LICENSE).
+GPL-3.0-or-later. See [LICENSE](LICENSE), including its warranty and liability
+provisions, and the [experimental-software disclaimer](plugins/lean-usage/DISCLAIMER.md).
 
 Contributions, including responsibly reviewed AI-assisted contributions, are
 welcome under the policy in [CONTRIBUTING.md](CONTRIBUTING.md).

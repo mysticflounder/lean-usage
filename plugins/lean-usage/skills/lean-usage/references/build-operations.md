@@ -63,13 +63,15 @@ Lean and Lake must already be installed and discoverable on `PATH` (or supplied
 through `REAL_LEAN` and `REAL_LAKE`). `uv` supplies Python, not a Lean toolchain;
 if these prerequisites are absent, report them before attempting a build.
 
-The trusted SessionStart hook supplies an absolute command containing its working
+The SessionStart hook supplies an absolute command containing its working
 Python interpreter and the installed wrapper path. Use that command wherever this
 skill says `lake-build`; append target arguments normally. It works without
 `~/.local/bin` or `python3` on `PATH`, including when the optional symlink cannot
 be installed. Do not ask the user to edit `PATH` or shell profiles.
 
-Where hooks are disabled or untrusted, use
+Claude Code activates plugin hooks automatically with the installed, enabled
+plugin; it does not require separate per-hook approval. Codex applies its hook
+trust and enablement controls. Where hooks do not run, use
 `uv run --no-project python <plugin-root>/bin/lake-build` with the installed plugin
 root. The optional `~/.local/bin/lake-build` symlink remains available for users
 whose shell already resolves it; it is not an installation prerequisite.
@@ -77,8 +79,8 @@ whose shell already resolves it; it is not an installation prerequisite.
 The `protect-lake-build` PreToolUse hook denies file edits, patches, and recognized
 shell writes to the deployed `~/.local/bin/lake-build`. Make wrapper changes in
 `plugins/lean-usage/bin/lake-build` in the plugin source, then update the installed
-plugin. Reads and normal wrapper execution remain available. Hooks run only when
-enabled and trusted; shell recognition is heuristic, so this is a workflow aid,
+plugin. Reads and normal wrapper execution remain available. Hook activation
+follows the host-specific behavior above; shell recognition is heuristic, so this is a workflow aid,
 not a guarantee against arbitrary writes. SessionStart also preserves an unexpected
 regular file at the deployment path rather than overwriting possible local work.
 
@@ -196,7 +198,7 @@ normal build budget.
 
 The plugin also ships a pre-tool hook that denies a recognized raw build or direct-Lean
 command when the mathlib cache is empty or its oleans predate the pinned toolchain.
-That hook runs only where the user trusted the plugin's hooks, so treat it as a
+That hook depends on the host running the plugin's hooks, so treat it as a
 convenience, not as the guarantee. Managed `lake-build` invocations are allowed
 through so their own fail-closed prefetch can repair an empty or stale cache.
 The wrapper's own prefetch is the part that always runs.
