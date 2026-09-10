@@ -25,8 +25,8 @@ model-invoked skills.
 
 | Host/event | Hook behavior |
 |---|---|
-| Claude and Codex `SessionStart` | Keeps `~/.local/bin/lake-build` pointed at the active wrapper via [`sync-lake-build.py`](plugins/lean-usage/hooks/sync-lake-build.py). |
-| Claude and Codex `PreToolUse` (Bash) | Warns on direct `lake`/`lean` calls via [`lean-direct-warn.py`](plugins/lean-usage/hooks/lean-direct-warn.py) and denies recognized raw mathlib builds with a missing or stale cache via [`mathlib-cache-check.py`](plugins/lean-usage/hooks/mathlib-cache-check.py). Managed wrapper calls proceed to their own cache prefetch. |
+| Claude and Codex `SessionStart` | Supplies an absolute wrapper invocation to the agent and maintains an optional `~/.local/bin/lake-build` symlink via [`sync-lake-build.py`](plugins/lean-usage/hooks/sync-lake-build.py). No PATH setup is needed. |
+| Claude and Codex `PreToolUse` (Bash, run_command, exec_command) | Warns on direct `lake`/`lean` calls via [`lean-direct-warn.py`](plugins/lean-usage/hooks/lean-direct-warn.py) and denies recognized raw mathlib builds with a missing or stale cache via [`mathlib-cache-check.py`](plugins/lean-usage/hooks/mathlib-cache-check.py). Managed wrapper calls proceed to their own cache prefetch. |
 | Claude and Codex `PreToolUse` (file edits, patches, shell commands) | [`protect-lake-build.py`](plugins/lean-usage/hooks/protect-lake-build.py) denies direct edits and recognized shell writes to the managed `~/.local/bin/lake-build`; edit the plugin source instead. |
 
 Claude registers these in [`hooks/hooks.json`](plugins/lean-usage/hooks/hooks.json);
@@ -83,21 +83,17 @@ Supported platforms are macOS and Linux. Windows support is intended, but has
 not yet been tested; please [open an issue](https://github.com/mysticflounder/lean-usage/issues)
 if you encounter a Windows-specific problem.
 
-Requirements: `uv` for hook execution, Python 3.10+ with a `python3` executable
-on `PATH` for the directly invoked wrapper, a POSIX shell (`/bin/sh`), Lean 4 with Lake,
+Requirements: `uv` with Python 3.10+, a POSIX shell (`/bin/sh`), Lean 4 with Lake,
 and `lake exe cache` for mathlib projects. Repository checks also require
-Bash, `jq`, and Python 3.11+ (the tests use `contextlib.chdir`). Having a Python
-interpreter managed by `uv` alone does not guarantee that the wrapper's
-`#!/usr/bin/env python3` can find it.
+Bash, `jq`, and Python 3.11+ (the tests use `contextlib.chdir`).
 
-On macOS/Linux, put `~/.local/bin` on your host application's `PATH` before
-starting a session. SessionStart creates the wrapper symlink but does not edit
-your shell profile or the host's environment. Restart the host after changing
-its environment, then verify `command -v lake-build` and `lake-build --help`.
-If Python is available only through `uv`, invoke the wrapper explicitly as
-`uv run --no-project python <plugin-root>/bin/lake-build` instead. If the symlink
-cannot be installed (including on Windows), use that explicit invocation with
-the installed plugin path. Windows shell and hook integration remain untested.
+No `PATH` or shell-profile changes are required for the wrapper. When hooks are
+trusted, SessionStart supplies the agent with a command using the absolute paths
+of its working Python interpreter and the installed wrapper. The optional symlink
+is only a convenience; a missing symlink or missing `~/.local/bin` on `PATH` does
+not prevent the supplied command from working. For hook-disabled sessions, use
+`uv run --no-project python <plugin-root>/bin/lake-build` with the installed plugin
+path. Windows shell and hook integration remain untested.
 
 ## Tests
 
@@ -109,6 +105,20 @@ This checks that every plugin's Claude, Codex, and compatibility manifests carry
 the same version, then runs the wrapper's lock, shim, telemetry, deployed-file
 edit-guard, and build-hook event tests. Synthetic hook events do not replace
 live host integration testing.
+
+For an isolated Linux test with a real Lean 4.28.0 toolchain:
+
+```bash
+bash scripts/test-docker.sh
+```
+
+This requires Docker and network access to build the test image. The test run
+itself has networking disabled, mounts the checkout read-only, and uses a disposable
+copy without host credentials. It runs the regression suite, installs the wrapper
+through SessionStart, then checks real Lean cold/warm builds, lock cleanup, and
+telemetry. The image is retained for reuse; the container is removed on exit.
+This is a runtime smoke test, not a Claude/Codex agent evaluation or a real mathlib
+cache-download test; cache-failure behavior is covered by regression fixtures.
 
 ## Provenance
 

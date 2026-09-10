@@ -135,6 +135,11 @@ Use this for caching and CI: the manifest's checksums are stable.
 
 When a file already has helper imports from a previous run:
 
+Preserve the current input in a commit or explicit backup before normalizing in
+place, including any uncommitted edits. Alternatively, write normalized output to
+a separate file and review it before replacing the source. Do not overwrite another
+worker's changes.
+
 ```bash
 # 1. Strip stale helper imports in place.
 lean-shard normalize --config policy.toml --input Pkg/Source.lean --output Pkg/Source.lean

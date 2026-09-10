@@ -59,20 +59,20 @@ It:
 `LEAN_USAGE_SKIP_CACHE_CHECK` is read by the plugin's cache-guard hook. Every other
 variable in the table is read by the wrapper itself.
 
-The plugin's SessionStart hook keeps `~/.local/bin/lake-build` pointed at the active
-wrapper. A host runs a plugin hook only after the user trusts it, so on a host where
-hooks are untrusted or the plugin is disabled nothing installs the wrapper. If the
-bare name is not found:
+Lean and Lake must already be installed and discoverable on `PATH` (or supplied
+through `REAL_LEAN` and `REAL_LAKE`). `uv` supplies Python, not a Lean toolchain;
+if these prerequisites are absent, report them before attempting a build.
 
-- run the plugin's own copy at `<plugin-root>/bin/lake-build` (requires `python3`
-  on `PATH`), or `uv run --no-project python <plugin-root>/bin/lake-build`;
-- or symlink that file into a directory on `PATH`;
-- or trust the plugin's hooks and start a new session.
+The trusted SessionStart hook supplies an absolute command containing its working
+Python interpreter and the installed wrapper path. Use that command wherever this
+skill says `lake-build`; append target arguments normally. It works without
+`~/.local/bin` or `python3` on `PATH`, including when the optional symlink cannot
+be installed. Do not ask the user to edit `PATH` or shell profiles.
 
-Also confirm that `~/.local/bin` is on the host application's `PATH`; SessionStart
-does not edit shell profiles or change the host environment. Restart the host
-after updating its environment. Every rule in this skill that names
-`lake-build` applies to whichever of these entry points is in use.
+Where hooks are disabled or untrusted, use
+`uv run --no-project python <plugin-root>/bin/lake-build` with the installed plugin
+root. The optional `~/.local/bin/lake-build` symlink remains available for users
+whose shell already resolves it; it is not an installation prerequisite.
 
 The `protect-lake-build` PreToolUse hook denies file edits, patches, and recognized
 shell writes to the deployed `~/.local/bin/lake-build`. Make wrapper changes in

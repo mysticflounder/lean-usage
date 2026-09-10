@@ -76,6 +76,35 @@ def extract_commands(command_str):
 
 def is_direct_build_call(exe, args):
     """True if (exe, args) is a build/compile invocation we want to warn about."""
+    # `env` and `command` are common ways to preserve the caller's environment
+    # while invoking a program.  Inspect their command operand so the warning
+    # is not bypassed by a harmless-looking launcher.
+    if exe in {"env", "command"}:
+        index = 0
+        while index < len(args):
+            arg = args[index]
+            if re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", arg):
+                index += 1
+                continue
+            if exe == "env" and arg in {
+                "-i", "--ignore-environment", "-0", "--null", "--",
+            }:
+                index += 1
+                continue
+            if exe == "env" and arg in {"-u", "--unset", "-C", "--chdir"}:
+                index += 2
+                continue
+            if exe == "command" and arg in {"-p", "--"}:
+                index += 1
+                continue
+            if arg.startswith("-"):
+                # Unknown launcher options may consume a value; do not guess
+                # past them and risk classifying an option value as a command.
+                return False
+            return bool(args[index:]) and is_direct_build_call(
+                os.path.basename(arg), args[index + 1:]
+            )
+        return False
     if exe == "lean":
         return not (args and args[0] in INFO_ARGS)
     if exe != "lake":
@@ -92,21 +121,51 @@ def is_direct_build_call(exe, args):
     return False
 
 
+def direct_build_executable(exe, args):
+    """Return the underlying direct-build executable, if any."""
+    if exe in LEAN_TOOLS and is_direct_build_call(exe, args):
+        return exe
+    if exe not in {"env", "command"}:
+        return None
+    index = 0
+    while index < len(args):
+        arg = args[index]
+        if re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", arg):
+            index += 1
+            continue
+        if exe == "env" and arg in {
+            "-i", "--ignore-environment", "-0", "--null", "--",
+        }:
+            index += 1
+            continue
+        if exe == "env" and arg in {"-u", "--unset", "-C", "--chdir"}:
+            index += 2
+            continue
+        if exe == "command" and arg in {"-p", "--"}:
+            index += 1
+            continue
+        if arg.startswith("-"):
+            return None
+        nested_exe = os.path.basename(arg)
+        return nested_exe if is_direct_build_call(nested_exe, args[index + 1:]) else None
+    return None
+
+
 def extract_tool_and_command(data: dict) -> tuple[str, str, str]:
     if "toolCall" in data and isinstance(data["toolCall"], dict):
         tc = data["toolCall"]
         tname = tc.get("name", "")
-        args = tc.get("args") or {}
+        args = tc.get("args") if isinstance(tc.get("args"), dict) else {}
         cmd = args.get("CommandLine") or args.get("command") or args.get("cmd") or ""
         return ("antigravity", tname, cmd)
     if "hook_event" in data and isinstance(data["hook_event"], dict):
         event = data["hook_event"]
         tname = event.get("tool_name", "")
-        tinput = event.get("tool_input", {}) or {}
+        tinput = event.get("tool_input") if isinstance(event.get("tool_input"), dict) else {}
         cmd = tinput.get("command") or tinput.get("CommandLine") or tinput.get("cmd") or ""
         return ("codex", tname, cmd)
     tname = data.get("tool_name", "")
-    tinput = data.get("tool_input", {}) or {}
+    tinput = data.get("tool_input") if isinstance(data.get("tool_input"), dict) else {}
     cmd = tinput.get("command") or tinput.get("CommandLine") or tinput.get("cmd") or ""
     return ("claude", tname, cmd)
 
@@ -117,19 +176,22 @@ def main():
     except (json.JSONDecodeError, EOFError, ValueError):
         return
 
+    if not isinstance(hook_input, dict):
+        return
+
     platform, tool_name, command = extract_tool_and_command(hook_input)
 
     if tool_name not in ("Bash", "run_command", "exec_command"):
         return
 
-    if not command:
+    if not isinstance(command, str) or not command:
         return
 
     commands = extract_commands(command)
     direct = [
-        exe
+        detected
         for exe, args in commands
-        if exe in LEAN_TOOLS and is_direct_build_call(exe, args)
+        if (detected := direct_build_executable(exe, args)) is not None
     ]
 
     if not direct:

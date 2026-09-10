@@ -24,6 +24,7 @@ to be forwarded (so `lake-build -- --help` reaches Lake's own build help).
 import atexit
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -31,6 +32,11 @@ import sys
 import tempfile
 import time
 from datetime import datetime, timezone
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10 fallback remains available below.
+    tomllib = None
 
 PROG = "lake-build"
 
@@ -155,7 +161,12 @@ def uses_mathlib(lean_root: str) -> bool:
     try:
         with open(manifest, "r", encoding="utf-8") as fh:
             packages = json.load(fh).get("packages", [])
-        if any(isinstance(pkg, dict) and pkg.get("name") == "mathlib" for pkg in packages):
+        if any(
+            isinstance(pkg, dict)
+            and isinstance(pkg.get("name"), str)
+            and pkg["name"].lower() == "mathlib"
+            for pkg in (packages if isinstance(packages, list) else [])
+        ):
             return True
     except (OSError, AttributeError, json.JSONDecodeError):
         pass
@@ -163,8 +174,38 @@ def uses_mathlib(lean_root: str) -> bool:
     for filename in ("lakefile.toml", "lakefile.lean"):
         try:
             with open(os.path.join(lean_root, filename), "r", encoding="utf-8") as fh:
-                if "mathlib" in fh.read().lower():
-                    return True
+                text = fh.read()
+            if filename == "lakefile.toml":
+                if tomllib is not None:
+                    try:
+                        parsed = tomllib.loads(text)
+                    except (ValueError, TypeError):
+                        parsed = None
+                    if isinstance(parsed, dict):
+                        requires = parsed.get("require", [])
+                        if isinstance(requires, dict):
+                            requires = [requires]
+                        if any(
+                            isinstance(pkg, dict)
+                            and isinstance(pkg.get("name"), str)
+                            and pkg["name"].lower() == "mathlib"
+                            for pkg in (requires if isinstance(requires, list) else [])
+                        ):
+                            return True
+                        continue
+                in_require = False
+                for line in text.splitlines():
+                    stripped = line.split("#", 1)[0].strip().lower()
+                    if stripped.startswith("[["):
+                        in_require = stripped == "[[require]]"
+                    elif stripped.startswith("["):
+                        in_require = False
+                    elif in_require and re.match(
+                        r"name\s*=\s*[\"']mathlib[\"']\s*$", stripped
+                    ):
+                        return True
+            elif re.search(r"(?im)^\s*require\b[^\n]*\bmathlib\b", text):
+                return True
         except OSError:
             pass
     return False
@@ -518,9 +559,8 @@ def main() -> int:
     # --- run + time -------------------------------------------------------
     # A build is dead time if you watch it compile — nudge toward working ahead.
     err(
-        f"{PROG}: building — don't just wait on it. Update docstrings/module docs "
-        "for what you just wrote, stage the next edit or commit "
-        "message, or line up the next module while this runs."
+        f"{PROG}: building — use the wait time for independent reading, search, "
+        "or planning outside the running source graph."
     )
 
     # Stream Lake's merged output live (like `... 2>&1 | tee`) while counting how

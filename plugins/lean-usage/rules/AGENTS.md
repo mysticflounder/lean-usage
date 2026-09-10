@@ -3,7 +3,7 @@
 House governance for Lean 4 theorem proving and builds.
 
 ## 1. Build Discipline
-- **Use `lake-build`**: When builds are authorized, use `lake-build` for the whole project or `lake-build <Target>` for one target. Arguments are forwarded verbatim to `lake build`, so never pass `build` yourself. Deliberate single-file/profiler checks and authorized mathlib source builds follow [build-operations.md](../skills/lean-usage/references/build-operations.md) and the target project's policy; this rule never overrides a no-build gate. The trusted SessionStart hook creates `~/.local/bin/lake-build` but does not add that directory to `PATH`. If the bare name is missing, use `uv run --no-project python <plugin-root>/bin/lake-build` with the installed plugin path.
+- **Use `lake-build`**: When builds are authorized, use the absolute wrapper command supplied by SessionStart; `lake-build` in these rules is shorthand for that command. Append `<Target>` for one target and never pass `build` yourself. Deliberate single-file/profiler checks and authorized mathlib source builds follow [build-operations.md](../skills/lean-usage/references/build-operations.md) and the target project's policy; this rule never overrides a no-build gate. No PATH edits are required. Where hooks are disabled, use `uv run --no-project python <plugin-root>/bin/lake-build` with the installed plugin path.
 - **Mathlib Cache**: `lake-build` runs `lake exe cache get` itself in a Mathlib project and refuses to build from source if that prefetch fails. Run the cache command by hand only for a build that does not go through the wrapper.
 
 ## 2. Proof & Theorem Discipline

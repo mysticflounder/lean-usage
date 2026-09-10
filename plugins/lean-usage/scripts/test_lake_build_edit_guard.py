@@ -138,6 +138,9 @@ class LakeBuildEditGuardTests(unittest.TestCase):
             self.bash_payload(
                 "python3 -c 'print(open(\"~/.local/bin/lake-build\").read())'"
             ),
+            self.bash_payload(
+                "python3 -c 'open(\"~/.local/bin/lake-build.bak\", \"w\").write(\"x\")'"
+            ),
             {
                 "tool_name": "Edit",
                 "tool_input": {"file_path": str(PLUGIN_ROOT / "bin" / "lake-build")},
@@ -154,6 +157,19 @@ class LakeBuildEditGuardTests(unittest.TestCase):
         for payload in allowed_payloads:
             with self.subTest(payload=payload):
                 self.assertIsNone(self.run_guard(payload))
+
+    def test_patch_header_with_crlf_still_blocks(self) -> None:
+        patch = (
+            "*** Begin Patch\r\n"
+            f"*** Update File: {self.target}\r\n"
+            "@@\r\n-old\r\n+new\r\n"
+            "*** End Patch\r\n"
+        )
+        self.assert_denied({
+            "tool_name": "apply_patch",
+            "tool_input": {"command": patch},
+            "cwd": str(self.home),
+        })
 
     def test_antigravity_denial_shape(self) -> None:
         output = self.run_guard({

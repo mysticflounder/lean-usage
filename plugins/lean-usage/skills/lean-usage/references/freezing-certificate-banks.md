@@ -5,6 +5,10 @@ to replay, Lean generation, archival, CI, or publication. A freeze establishes
 which exact bytes and tools a later result refers to. It does not itself verify the
 certificates or promote their mathematical claim.
 
+Generation, replay, and builds below require the target project's authorization.
+Under a no-build/no-run gate, record existing evidence and mark missing checks
+incomplete; do not execute them or claim verification to finish the freeze record.
+
 ## Keep the claims separate
 
 - **Frozen** means the complete bank has a content-bound identity and can be

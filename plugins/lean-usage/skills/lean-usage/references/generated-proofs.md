@@ -82,7 +82,9 @@ only the later proof steps will not remove that front-loaded elaboration cost.
 
 For an exact frozen DIMACS instance and a RUP-only Lean checker:
 
-1. Solve the unchanged CNF with `cadical --plain` and retain the DRAT proof.
+1. Solve the unchanged CNF with `cadical --plain --no-binary` and retain the
+   text DRAT proof. The DRAT-to-Lean Python parser requires text, not CaDiCaL's
+   default binary output; check the installed solver's supported flags first.
 2. Run `drat-trim ... -L ...`; require both `s VERIFIED` and `0 RAT lemmas`.
    Treat `--plain` as a proof-shape heuristic, never as evidence by itself.
 3. Densify sparse LRAT addition IDs and rewrite all hints and deletions

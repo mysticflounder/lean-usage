@@ -109,9 +109,11 @@ def extract_event(data: dict[str, Any]) -> tuple[str, str, dict[str, Any], str]:
     if isinstance(data.get("toolCall"), dict):
         call = data["toolCall"]
         args = call.get("args") if isinstance(call.get("args"), dict) else {}
-        workspaces = data.get("workspacePaths") or []
+        workspaces = data.get("workspacePaths")
         cwd = args.get("Cwd") or args.get("cwd") or args.get("workdir") or (
-            workspaces[0] if workspaces else os.getcwd()
+            workspaces[0]
+            if isinstance(workspaces, list) and workspaces
+            else os.getcwd()
         )
         return "antigravity", str(call.get("name", "")), args, str(cwd)
 
@@ -146,7 +148,7 @@ def extract_event(data: dict[str, Any]) -> tuple[str, str, dict[str, Any], str]:
 
 def patch_touches_protected(command: str, cwd: str) -> bool:
     for match in PATCH_PATH_RE.finditer(command):
-        candidate = match.group(1) or match.group(2)
+        candidate = (match.group(1) or match.group(2)).strip()
         if is_protected_path(candidate, cwd):
             return True
     return False
@@ -167,7 +169,16 @@ def command_mentions_protected(command: str) -> bool:
         "$env:USERPROFILE/.local/bin/lake-build",
     }
     folded = command.casefold()
-    return any(alias.casefold() in folded for alias in aliases)
+    # Match the complete filename, not a prefix such as lake-build.bak.  The
+    # hook also scans embedded Python/PowerShell strings, so tokenizing alone
+    # would miss those references.
+    return any(
+        re.search(
+            rf"(?<![a-z0-9_.-]){re.escape(alias.casefold())}(?![a-z0-9_.-])",
+            folded,
+        )
+        for alias in aliases
+    )
 
 
 def is_indirect_reference(value: str) -> bool:
@@ -346,6 +357,9 @@ def main() -> None:
     try:
         data = json.load(sys.stdin)
     except (json.JSONDecodeError, EOFError, ValueError):
+        return
+
+    if not isinstance(data, dict):
         return
 
     platform, tool_name, tool_input, cwd = extract_event(data)

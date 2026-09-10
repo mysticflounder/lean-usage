@@ -27,6 +27,11 @@ import shlex
 import sys
 from pathlib import Path
 
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 fallback below
+    tomllib = None
+
 OLEAN_THRESHOLD = 100  # fresh `lake exe cache get` produces ~8000; any real build produces >>100
 
 
@@ -99,17 +104,46 @@ def is_build_invocation(tokens):
 
 
 def is_cd(tokens):
-    return len(tokens) >= 2 and tokens[0] == "cd"
+    index = 0
+    while index < len(tokens) and re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", tokens[index]):
+        index += 1
+    return index < len(tokens) and tokens[index] == "cd"
+
+
+def cd_args(tokens):
+    """Return arguments for a `cd` statement, skipping leading assignments."""
+    index = 0
+    while index < len(tokens) and re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", tokens[index]):
+        index += 1
+    return tokens[index + 1:]
 
 
 def resolve_cwd_at(initial_cwd, statements, target_idx):
     """Apply any `cd` statements before target_idx to compute effective cwd."""
-    cwd = Path(initial_cwd)
+    try:
+        cwd = Path(initial_cwd)
+    except (OSError, TypeError, ValueError):
+        cwd = Path.cwd()
+    previous_cwd = None
     for i in range(target_idx):
         stmt = statements[i]
         if is_cd(stmt):
-            target = stmt[1]
-            cwd = Path(target) if os.path.isabs(target) else (cwd / target)
+            args = cd_args(stmt)
+            while args and args[0] in {"-L", "-P"}:
+                args = args[1:]
+            if args and args[0] == "--":
+                args = args[1:]
+            if not args:
+                target = os.path.expanduser("~")
+            elif args[0] == "-":
+                if previous_cwd is not None:
+                    cwd, previous_cwd = previous_cwd, cwd
+                continue
+            else:
+                target = os.path.expanduser(os.path.expandvars(args[0]))
+            next_cwd = Path(target) if os.path.isabs(target) else (cwd / target)
+            if next_cwd.is_dir():
+                previous_cwd, cwd = cwd, next_cwd
     try:
         return cwd.resolve()
     except (OSError, RuntimeError):
@@ -137,8 +171,13 @@ def uses_mathlib(project_root):
     if manifest.exists():
         try:
             data = json.loads(manifest.read_text())
-            for pkg in data.get("packages", []):
-                if pkg.get("name") == "mathlib":
+            packages = data.get("packages", []) if isinstance(data, dict) else []
+            for pkg in packages if isinstance(packages, list) else []:
+                if (
+                    isinstance(pkg, dict)
+                    and isinstance(pkg.get("name"), str)
+                    and pkg["name"].lower() == "mathlib"
+                ):
                     return True
         except (json.JSONDecodeError, OSError):
             pass
@@ -146,9 +185,41 @@ def uses_mathlib(project_root):
         f = project_root / fn
         if f.exists():
             try:
-                if "mathlib" in f.read_text().lower():
+                text = f.read_text()
+                if fn == "lakefile.toml":
+                    if tomllib is not None:
+                        try:
+                            parsed = tomllib.loads(text)
+                        except (ValueError, TypeError):
+                            parsed = None
+                        if isinstance(parsed, dict):
+                            requires = parsed.get("require", [])
+                            if isinstance(requires, dict):
+                                requires = [requires]
+                            if any(
+                                isinstance(pkg, dict)
+                                and isinstance(pkg.get("name"), str)
+                                and pkg["name"].lower() == "mathlib"
+                                for pkg in (requires if isinstance(requires, list) else [])
+                            ):
+                                return True
+                            continue
+                    # Python 3.10 fallback: inspect only [[require]] blocks;
+                    # comments and unrelated strings must not enable the gate.
+                    in_require = False
+                    for line in text.splitlines():
+                        stripped = line.split("#", 1)[0].strip().lower()
+                        if stripped.startswith("[["):
+                            in_require = stripped == "[[require]]"
+                        elif stripped.startswith("["):
+                            in_require = False
+                        elif in_require and re.match(
+                            r"name\s*=\s*[\"']mathlib[\"']\s*$", stripped
+                        ):
+                            return True
+                elif re.search(r"(?im)^\s*require\b[^\n]*\bmathlib\b", text):
                     return True
-            except OSError:
+            except (OSError, ValueError, TypeError):
                 pass
     return False
 
@@ -230,14 +301,16 @@ def extract_tool_info(data: dict) -> tuple[str, str, str, str]:
     if "toolCall" in data and isinstance(data["toolCall"], dict):
         tc = data["toolCall"]
         tname = tc.get("name", "")
-        args = tc.get("args") or {}
+        args = tc.get("args") if isinstance(tc.get("args"), dict) else {}
         cmd = args.get("CommandLine") or args.get("command") or args.get("cmd") or ""
-        cwd = args.get("Cwd") or (data.get("workspacePaths") or [os.getcwd()])[0]
-        return ("antigravity", tname, cmd, cwd)
+        workspaces = data.get("workspacePaths")
+        workspace = workspaces[0] if isinstance(workspaces, list) and workspaces else None
+        cwd = args.get("Cwd") or workspace or os.getcwd()
+        return ("antigravity", tname, cmd, str(cwd))
     if "hook_event" in data and isinstance(data["hook_event"], dict):
         event = data["hook_event"]
         tname = event.get("tool_name", "")
-        tinput = event.get("tool_input", {}) or {}
+        tinput = event.get("tool_input") if isinstance(event.get("tool_input"), dict) else {}
         cmd = tinput.get("command") or tinput.get("CommandLine") or tinput.get("cmd") or ""
         cwd = (
             tinput.get("cwd")
@@ -248,9 +321,9 @@ def extract_tool_info(data: dict) -> tuple[str, str, str, str]:
             or data.get("workdir")
             or os.getcwd()
         )
-        return ("codex", tname, cmd, cwd)
+        return ("codex", tname, cmd, str(cwd))
     tname = data.get("tool_name", "")
-    tinput = data.get("tool_input", {}) or {}
+    tinput = data.get("tool_input") if isinstance(data.get("tool_input"), dict) else {}
     cmd = tinput.get("command") or tinput.get("CommandLine") or tinput.get("cmd") or ""
     cwd = (
         tinput.get("cwd")
@@ -259,7 +332,7 @@ def extract_tool_info(data: dict) -> tuple[str, str, str, str]:
         or data.get("workdir")
         or os.getcwd()
     )
-    return ("claude", tname, cmd, cwd)
+    return ("claude", tname, cmd, str(cwd))
 
 
 def main():
@@ -271,12 +344,15 @@ def main():
     except (json.JSONDecodeError, EOFError, ValueError):
         return
 
+    if not isinstance(hook_input, dict):
+        return
+
     platform, tool_name, command, cwd = extract_tool_info(hook_input)
 
     if tool_name not in ("Bash", "run_command", "exec_command"):
         return
 
-    if not command:
+    if not isinstance(command, str) or not command:
         return
 
     statements = split_statements(command)

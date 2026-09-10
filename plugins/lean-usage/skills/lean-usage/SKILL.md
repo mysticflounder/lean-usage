@@ -175,10 +175,12 @@ lake-build Foo.Bar         # one target
 lake-build --jobs 4        # forwarded to `lake build`; advisory, not a hard cap
 ```
 
-`lake-build` reaches `PATH` through the plugin's SessionStart hook, and a host runs a
-plugin hook only when the user trusts it. Do not assume the wrapper is installed. If
-the bare name is not found, run the plugin's own `bin/lake-build` by path, or symlink
-it into a directory on `PATH`; see
+Use the absolute wrapper command supplied by the trusted SessionStart hook in
+place of the `lake-build` shorthand above. It uses a working Python interpreter
+and does not depend on `~/.local/bin` or `python3` being on `PATH`. Do not ask the
+user to change `PATH`. If hooks are disabled, use
+`uv run --no-project python <plugin-root>/bin/lake-build` with this skill's plugin
+root; see
 [build-operations.md](references/build-operations.md#lake-build).
 
 In a mathlib project the wrapper runs `lake exe cache get` itself and refuses to build
@@ -208,7 +210,8 @@ Do not edit files in the running build's source graph and then cite that build a
 validation of the edited state. Prepare notes or the next change separately and wait
 for a fresh build after source changes.
 
-Build time is work time, not wait time. Always run `lake-build` in the background.
+When a build is authorized, run `lake-build` in the background; build time can
+also be used for independent work. This never overrides a no-build gate.
 If the harness automatically delivers a completion notice with the build's exit status
 and output, rely on it. Otherwise, collect the terminal result via the returned session
 ID using the host's blocking session-wait operation. Never busy-poll: no `sleep`,

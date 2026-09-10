@@ -58,6 +58,11 @@ suppress deprecation warnings to obtain a clean checkpoint. If a name has alread
 disappeared, inspect an earlier revision's alias or upstream history for the
 replacement rather than guessing from similar names.
 
+If the selected revision has no usable mathlib cache, the wrapper fails closed.
+Do not weaken that behavior to complete the upgrade: use the explicitly authorized
+[source-build exception](build-operations.md#mathlib-cache), recording the cold-build
+cost separately, or stop and report the missing cache/authorization.
+
 Before accepting the upgrade, rerun the project's trust checks (including axiom
 closure and native/external-evidence policy checks) and compare build
 performance under comparable cache and resource conditions. Toolchain changes

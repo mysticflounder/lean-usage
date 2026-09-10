@@ -381,6 +381,24 @@ class LakeBuildLockTests(unittest.TestCase):
             )
             self.assertIn("refusing source build", failure.stderr)
 
+    def test_mathlib_detection_is_dependency_specific(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "lakefile.toml").write_text(
+                'name = "mathlib-themed-project"\n'
+                '[[require]]\nname = "other-package"\n'
+                '[package]\nsummary = "mathlib is mentioned in documentation"\n',
+                encoding="utf-8",
+            )
+            self.assertFalse(lake_build.uses_mathlib(str(root)))
+
+            (root / "lakefile.lean").write_text(
+                'require "leanprover-community" / "mathlib" @ git '
+                '"https://github.com/leanprover-community/mathlib4"\n',
+                encoding="utf-8",
+            )
+            self.assertTrue(lake_build.uses_mathlib(str(root)))
+
     def test_busy_main_does_not_create_build_log(self):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)

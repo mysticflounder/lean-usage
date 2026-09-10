@@ -15,3 +15,4 @@ cd "$ROOT/plugins/lean-usage"
 uv run --no-project python scripts/test_lake_build_lock.py
 uv run --no-project python scripts/test_lake_build_edit_guard.py
 uv run --no-project python scripts/test_build_hooks.py
+uv run --no-project python scripts/test_sync_lake_build.py

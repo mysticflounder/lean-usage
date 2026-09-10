@@ -10,6 +10,7 @@
 """Synthetic hook-event tests for cache, warning, and wrapper protection hooks."""
 
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -21,12 +22,13 @@ ROOT = Path(__file__).resolve().parent.parent
 HOOKS = ROOT / "hooks"
 
 
-def invoke(hook: str, payload: dict) -> dict | None:
+def invoke(hook: str, payload: dict, env: dict | None = None) -> dict | None:
     result = subprocess.run(
         [sys.executable, str(HOOKS / hook)],
         input=json.dumps(payload),
         text=True,
         capture_output=True,
+        env=env,
         check=False,
     )
     if result.returncode != 0:
@@ -81,6 +83,34 @@ class BuildHookTests(unittest.TestCase):
                 }
             }
             output = invoke("mathlib-cache-check.py", payload)
+            self.assertEqual(output["hookSpecificOutput"]["permissionDecision"], "deny")
+
+    def test_cd_with_assignment_resolves_later_build(self):
+        with tempfile.TemporaryDirectory() as directory:
+            project = self.make_mathlib_project(directory)
+            payload = {
+                "tool_name": "exec_command",
+                "tool_input": {
+                    "cmd": f"ROOT={directory} cd project && lake build",
+                    "workdir": directory,
+                },
+            }
+            output = invoke("mathlib-cache-check.py", payload)
+            self.assertEqual(output["hookSpecificOutput"]["permissionDecision"], "deny")
+
+    def test_bare_cd_expands_home_before_later_build(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory) / "home"
+            project = home / "project"
+            project.mkdir(parents=True)
+            (home / "lakefile.toml").write_text(
+                '[[require]]\nname = "mathlib"\n', encoding="utf-8"
+            )
+            env = dict(os.environ, HOME=str(home))
+            output = invoke("mathlib-cache-check.py", {
+                "tool_name": "exec_command",
+                "tool_input": {"cmd": "cd && lake build", "workdir": str(project)},
+            }, env=env)
             self.assertEqual(output["hookSpecificOutput"]["permissionDecision"], "deny")
 
     def test_harmless_echo_is_not_a_build(self):
@@ -152,6 +182,64 @@ class BuildHookTests(unittest.TestCase):
             "tool_input": {"cmd": "lake-build && lake build"},
         })
         self.assertIn("Direct lake invocation detected", output["hookSpecificOutput"]["additionalContext"])
+
+    def test_direct_warning_sees_launcher_wrapped_build(self):
+        for command in (
+            "env FOO=bar lake build",
+            "env -u FOO lake build",
+            "command -p lake env lean Main.lean",
+        ):
+            with self.subTest(command=command):
+                output = invoke("lean-direct-warn.py", {
+                    "tool_name": "exec_command",
+                    "tool_input": {"cmd": command},
+                })
+                self.assertIn("Direct lake invocation detected", output["hookSpecificOutput"]["additionalContext"])
+
+    def test_cache_check_ignores_unrelated_mathlib_text(self):
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory) / "project"
+            project.mkdir()
+            (project / "lakefile.toml").write_text(
+                "name = 'not-mathlib'\n# mathlib is discussed here, but not required\n",
+                encoding="utf-8",
+            )
+            output = invoke("mathlib-cache-check.py", {
+                "tool_name": "exec_command",
+                "tool_input": {"cmd": "lake build", "workdir": str(project)},
+            })
+            self.assertIsNone(output)
+
+    def test_cache_check_recognizes_scoped_lean_mathlib_requirement(self):
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory) / "project"
+            project.mkdir()
+            (project / "lakefile.lean").write_text(
+                'require "leanprover-community" / "mathlib" @ git '
+                '"https://github.com/leanprover-community/mathlib4"\n',
+                encoding="utf-8",
+            )
+            output = invoke("mathlib-cache-check.py", {
+                "tool_name": "exec_command",
+                "tool_input": {"cmd": "lake build", "workdir": str(project)},
+            })
+            self.assertEqual(output["hookSpecificOutput"]["permissionDecision"], "deny")
+
+    def test_hooks_ignore_malformed_payloads(self):
+        payloads = (
+            [],
+            {"toolCall": {"name": "run_command", "args": "bad"}},
+            {"hook_event": {"tool_name": "exec_command", "tool_input": "bad"}},
+            {"tool_name": "exec_command", "tool_input": {"cmd": 123}},
+        )
+        for hook in (
+            "lean-direct-warn.py",
+            "mathlib-cache-check.py",
+            "protect-lake-build.py",
+        ):
+            for payload in payloads:
+                with self.subTest(hook=hook, payload=payload):
+                    self.assertIsNone(invoke(hook, payload))
 
 
 if __name__ == "__main__":
