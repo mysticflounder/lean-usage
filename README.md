@@ -75,9 +75,8 @@ path instead of overwriting local work.
 
 ### Companion Lean 4 plugin
 
-We use the `lean4` plugin from
-[mysticflounder/lean4-skills](https://github.com/mysticflounder/lean4-skills), a fork
-of [Cameron Freer's lean4-skills](https://github.com/cameronfreer/lean4-skills).
+We use and recommend the `lean4-skills` plugin from
+Cameron Freer's [lean4-skills](https://github.com/cameronfreer/lean4-skills).
 Install it separately for general Lean proof development, tactic selection,
 proof-state inspection, and theorem search. This plugin complements it with build
 coordination, evidence and rigor standards, and project-governance guidance; the
