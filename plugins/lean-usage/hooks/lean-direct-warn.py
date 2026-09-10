@@ -23,8 +23,9 @@ LAKE_BUILD_SUBCMDS = {"build", "test"}
 WARNING = (
     "Direct {tools} invocation detected. "
     "Prefer the global `lake-build` wrapper, which adds a lockfile (prevents "
-    "concurrent builds), a memory-cap shim (-M 16384 MB) that lake does not "
-    "apply on its own, and per-build timing stats."
+    "concurrent builds) and per-build timing stats. Its PATH shim requests a "
+    "Lean memory limit (default -M 16384 MB), but Lake can bypass the shim by "
+    "invoking Lean by absolute path; this is not a guaranteed worker cap."
 )
 
 

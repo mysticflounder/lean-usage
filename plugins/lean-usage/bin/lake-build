@@ -6,7 +6,7 @@
 # lake-build — global Lean / Lake build wrapper. Works from anywhere inside a
 # Lake project: walks up to the lakefile, serializes top-level builds with a
 # stale-pid-aware lockfile, prefetches mathlib's binary cache before building,
-# caps each `lean` worker's memory via a PATH shim,
+# requests a per-worker Lean memory limit via a PATH shim (which Lake can bypass),
 # records per-build timing + how many targets recompiled (0 = fully-cached
 # no-op) to a JSONL stats file, and nudges when a build crosses the time budget.
 # It also records each module's own build time — read straight from Lake's
@@ -53,7 +53,9 @@ Runs from anywhere inside a Lake project. It:
     $LEAN_ROOT overrides discovery;
   - serializes top-level builds per project with a stale-PID-aware lockfile;
   - retains live build output in lake-build-logs/ beside the lock and prints its path;
-  - puts a temporary `lean` shim on PATH to cap each worker's memory ($MEMORY_MB);
+  - puts a temporary `lean` shim on PATH requesting a memory limit ($MEMORY_MB);
+    Lake can bypass this shim by invoking Lean by absolute path, so this is not
+    an enforced cap for every worker;
   - records each module's own build time into module-build-stats.jsonl (one record
     per module: dotted module name, duration_s, warnings flag, shared build_id),
     read from Lake's own "Built <module> (Ns)" progress lines — disable with
@@ -67,11 +69,12 @@ Examples:
   {PROG}                   # build the whole project
   {PROG} Foo.Bar           # build one target
   {PROG} --jobs 4          # forwarded to `lake build` (advisory, not a hard cap)
-  MEMORY_MB=8192 {PROG}    # tighter per-worker memory cap
+  MEMORY_MB=8192 {PROG}    # request a lower per-worker memory limit
 
 Environment:
   LEAN_ROOT             Explicit Lake root (overrides discovery).
-  MEMORY_MB             Per-`lean` memory cap, MB. Default 16384.
+  MEMORY_MB             Requested per-`lean` memory limit, MB. Default 16384.
+                        Applies only to invocations through the PATH shim.
   LOCKFILE              PID-lock path. Default <lake-root>/.lake/lake-build.lock.
                         First line: PID; second line: JSON sid/tmux_pane/build_log.
   REAL_LAKE, REAL_LEAN  Explicit toolchain executables. Default: resolved on PATH.

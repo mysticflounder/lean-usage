@@ -34,8 +34,8 @@ summary remains a concise gate overview rather than a competing policy source.
 
 ### C. Internal plugin names in a hook docstring
 
-The `sync-lake-build.py` docstring no longer names private plugins such as
-`py-run` or `auto-compact`. The Codex hook documentation also uses the host's
+The `sync-lake-build.py` docstring no longer names unrelated private plugins.
+The Codex hook documentation also uses the host's
 `${PLUGIN_ROOT}` resolution rather than the stale fixed-checkout-path comment.
 
 ### D. Items that follow the new protect-lake-build hook
@@ -56,6 +56,13 @@ is recorded here without folding it into the historical applied-item list.
 
 ## Applied in this pass
 
+The subsequent report/reference comparison also corrected requested-versus-enforced
+memory limits, Lake-phase timing scope, warning-threshold wording, profiling flags,
+and the incomplete sharding cache-key claim. Attribution examples now use actual
+contributor/rightsholder placeholders and preserve original credits. The report's
+public edition replaces inaccessible links with qualified historical evidence
+labels and removes internal-tool names; the companion PDF is regenerated with it.
+
 1. `SKILL.md` and `references/build-operations.md` — the wrapper prefetches the
    mathlib cache itself and fails closed; the manual `lake exe cache get` is now
    marked as the no-wrapper path only.
@@ -75,10 +82,11 @@ is recorded here without folding it into the historical applied-item list.
 7. Removed the stray `<!-- created_from: 752c93d -->` marker.
 9. Replaced the undefined "CEGAR wave-boundary checkpoint" and "anchored `sorry`"
    terms.
-10. Replaced the `E677`/`Piqd` namespace example and the erdos-97-96 glossary
+10. Replaced the project-specific namespace example and glossary
     reference with generic ones; removed the agent-smith and `attic` sentence.
-11. The `nthdegree` cross-project search route is now conditional, with a stated
-    fallback.
+11. The external cross-project search route was made conditional with a stated
+    fallback; the subsequent review replaced its internal-tool example with
+    tool-neutral discovery guidance.
 12. Added `skills/lean-usage/agents/openai.yaml`.
 13. `scripts/check-manifest-versions.sh` now covers the plugin-root manifest
     copy; `AGENTS.md` documents it and the bump rule names every manifest.

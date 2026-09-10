@@ -29,13 +29,17 @@ It:
 - lets `LEAN_ROOT` override discovery;
 - uses a stale-PID-aware lock at `<lake-root>/.lake/lake-build.lock` to prevent
   concurrent top-level builds in the same project;
-- puts a temporary `lean` shim on `PATH` to inject the per-worker memory cap;
+- puts a temporary `lean` shim on `PATH` to request the per-worker memory setting;
+  Lake commonly invokes `lean` by its absolute toolchain path, which bypasses the
+  shim, so this is not proof that a cap was enforced;
 - runs `lake exe cache get` first in a mathlib project and refuses the build when
   that prefetch fails, so an ordinary invocation never becomes a mathlib source
   compile;
 - records one per-build timing record per invocation, plus one per-module record
-  (build time, warnings flag) read from Lake's `Built <module> (Ns)` output, and
-  always removes its shim/lock — a signal interrupt still writes a partial
+  (build time, warnings flag) read from Lake's `Built <module> (Ns)` output. The
+  per-build duration covers the Lake build phase, not cache prefetch, wrapper
+  setup, or teardown. It always removes its shim/lock — a signal interrupt still
+  writes a partial
   per-build record and keeps the per-module records for modules already finished
   (see build-performance for the two JSONL files).
 
@@ -44,7 +48,7 @@ It:
 | Variable | Effect |
 |---|---|
 | `LEAN_ROOT` | Explicit Lake root. |
-| `MEMORY_MB` | Per-`lean` memory cap; default `16384`. |
+| `MEMORY_MB` | Requested per-`lean` memory setting in MB; default `16384`. The `memory_mb` telemetry field records this request, not an observed or guaranteed cap. |
 | `LOCKFILE` | PID-lock path; default `<lake-root>/.lake/lake-build.lock`. |
 | `REAL_LAKE`, `REAL_LEAN` | Explicit toolchain executables. |
 | `LEAN_USAGE_STATE_DIR` | Stats directory; default `~/.local/state/lean-usage`. |
@@ -132,8 +136,9 @@ nproc
 
 These are signals, not proofs: a Lean process may be unrelated, and zero Lean
 processes does not imply adequate memory or I/O headroom. If another Lean build is
-active, coordinate with its owner or wait. Lowering `MEMORY_MB` reduces each
-worker's ceiling but does not cap worker count.
+active, coordinate with its owner or wait. Lowering `MEMORY_MB` changes the
+requested setting where the compiler receives it, but the wrapper's PATH shim may
+be bypassed by Lake's absolute compiler path; it does not cap worker count.
 
 Do not mutate source files in a running build's dependency graph and then cite
 that build as validating the modified state. Rebuild after the edit.
@@ -158,7 +163,8 @@ If a generated module needs a hard single-worker build that emits `.olean` and
 1. uses the same coordination protocol as `lake-build` rather than applying
    `flock` to its PID-file path;
 2. derives output paths from that project's Lake layout;
-3. applies the same memory cap; and
+3. applies an explicit memory setting through the compiler invocation (and records
+   whether that setting is actually enforced); and
 4. fails if a top-level build is active.
 
 Do not copy a hard-coded `.lake/build/lib[/lean]` path between toolchain versions;

@@ -46,18 +46,11 @@ project. Otherwise use the repository's documented search facilities:
 rg -n "<terms>" .
 ```
 
-For the CROSS-PROJECT route, use a semantic search tool over the Lean corpora when
-the host has one. This plugin does not ship one. With `nthdegree`, one command
-searches mathlib and every other configured Lean corpus from any directory:
-
-```bash
-nthdegree docs search --lean "<statement or mathematical concept>"
-nthdegree docs search --lean --name '<name-pattern>' "<concept>"
-nthdegree docs search --lean --sig '<type fragment>' "<concept>"
-```
-
-Without such a tool, search the project's own mathlib checkout under
-`.lake/packages/mathlib` with the repository's documented facilities.
+For the CROSS-PROJECT route, use the host's generic indexed search over all
+configured Lean corpora when one is available. This plugin does not ship an
+indexer. Without an indexed search, search the project's own mathlib checkout
+under `.lake/packages/mathlib` and any other configured corpora with the
+repository's documented facilities.
 
 Use both project terminology and concept-level mathematical language. Treat every
 search hit as a candidate until the reuse preflight below passes.
@@ -204,8 +197,10 @@ is exceptional generated/certificate policy, never a default, and
 full [heartbeat policy](references/build-performance.md#heartbeat-policy).
 
 `lake-build` locates the Lake root, serializes top-level builds per project, prefetches
-the mathlib cache, caps each Lean worker's memory, records timing, and cleans up its
-lock/shim. Build status and
+the mathlib cache, requests each Lean worker's memory setting through a temporary
+PATH shim, records timing, and cleans up its lock/shim. Lake commonly invokes its
+compiler by absolute path, so the shim can be bypassed; `MEMORY_MB` is a requested
+setting, not proof that an effective memory cap was enforced. Build status and
 publication records are project-owned; follow the project's own refresh commands and
 gates when they exist.
 

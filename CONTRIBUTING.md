@@ -33,6 +33,24 @@ Prompt transcripts and token-level attribution are not required. A useful
 disclosure is brief, for example: "AI-assisted implementation and test review;
 I reviewed the diff and ran `scripts/test.sh`."
 
+## Attribution and provenance
+
+Keep attribution specific to the work performed:
+
+- Mathematical source authors are the authors of the paper, theorem, or problem
+  statement being formalized. Cite them as the source; do not present them as
+  authors of a new Lean file unless they authored that file.
+- The formalizer is the human who translates the source result into Lean. An
+  adapter is the human who changes existing code or a formalization. Credit each
+  person only for that contribution, in the file header, declaration docstring,
+  or source citation as appropriate.
+- Preserve existing copyright years, notices, rightsholders, and original
+  authors when modifying a file. Do not replace them with the adapter's details
+  or add a new license based on an adaptation.
+- AI assistance may be disclosed in the pull request, but an AI system is not an
+  author, co-author, reviewer, or signatory. If a rightsholder or human author is
+  unknown, ask the maintainer rather than guessing.
+
 Bulk generated changes are welcome only when the generation process is
 reproducible, the output has been reviewed, and the pull request is still small
 enough to evaluate responsibly. Maintainers may ask for the generator, inputs,
@@ -46,8 +64,10 @@ confirm that you have the right to submit it.
 
 Do not assume AI-generated material is free of third-party obligations. Cite
 sources used to derive code or documentation, preserve required notices, and
-do not submit copied material whose license is unknown or incompatible. Shell
-and Python sources must use the copyright, GPL-3.0-or-later, author, purpose,
+do not submit copied material whose license is unknown or incompatible. Do not
+infer relicensing from an adaptation; retain the destination repository's
+license and any compatible source notices. Shell and Python sources must use the
+copyright, GPL-3.0-or-later, author, purpose,
 and `Usage:` header form described in `AGENTS.md`.
 
 ## Privacy and security

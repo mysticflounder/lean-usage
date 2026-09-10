@@ -15,15 +15,16 @@ sharding decisions. For generated-proof emitters and artifact archival, read
 
 ## Budget
 
-With mathlib oleans warm, the wrapper defaults to:
+With mathlib oleans warm, use the wrapper defaults as warning signals:
 
-- `<= 10 min`: healthy target;
+- `<= 10 min`: no default duration warning;
 - `10–30 min`: profile and watch the slow tail;
 - `> 30 min`: refactor/shard candidate.
 
 These are default warning thresholds (`LAKE_BUILD_TARGET_S=600`,
-`LAKE_BUILD_CEIL_S=1800`), not permission to override a project-specific budget.
-Changing the variables changes the nudge; it does not make a regression healthy.
+`LAKE_BUILD_CEIL_S=1800`), not health guarantees or permission to override a
+project-specific budget. Changing the variables changes the nudge; it does not
+make a regression healthy.
 
 Measure a project's own modules on a reasonably quiet host. A cold mathlib build
 is a cache/setup failure, and host contention distorts wall time.
@@ -71,13 +72,18 @@ bound or be refactored unless the repository records a specific exception.
 ```
 
 Override the directory with `LEAN_USAGE_STATE_DIR`. A record contains timestamp,
-Lake root, arguments, duration, exit code, an activity count, memory cap, a
-`build_id`, the build-log path, and `interrupted`. `recompiled` counts Lake's build-activity lines —
+Lake root, arguments, duration, exit code, an activity count, requested memory
+setting, a `build_id`, the build-log path, and `interrupted`. `recompiled` counts
+Lake's build-activity lines —
 `Built`, `Building`, and `Compiling`, with or without warnings. It is an activity
 count, not a count of distinct modules: one module can contribute more than one
 line. `0` marks a fully-cached no-op (Lake is content-hash based), distinguishing
 a fast cached build from a fast real one. For a module count, use the
-`module-build-stats.jsonl` rows that carry the same `build_id`. `interrupted` is `true`
+`module-build-stats.jsonl` rows that carry the same `build_id`. `duration_s` is the
+elapsed Lake build phase, from launching Lake until it returns; it excludes cache
+prefetch, lock/setup work, temporary-shim setup, and teardown. `memory_mb` is the
+requested `MEMORY_MB` value, not an observed or guaranteed effective cap.
+`interrupted` is `true`
 when the build was stopped by a signal (Ctrl-C / SIGTERM) before Lake returned;
 such a record is partial — `duration_s` is the elapsed time so far, `exit_code`
 is `128 + signum`, and `recompiled` counts only what finished. Records written
@@ -130,6 +136,9 @@ jq -s --arg b "$b" \
 
 Direct Lean is an explicit profiling exception to the normal `lake-build` rule.
 Dependencies must already be built, and no same-project build may run concurrently.
+Preserve any explicitly pinned resource flags from the project's normal invocation
+when profiling (for example `-M` and `-j`); changing them measures a
+different workload. Add only the profiler switch and the resource-monitor command.
 
 ```bash
 cd <lake-root>

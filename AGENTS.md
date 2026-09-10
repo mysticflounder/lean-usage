@@ -13,9 +13,8 @@ the wrapper's telemetry and the skills' conventions did for Lean build
 throughput. The report lives in `docs/reports/`; the plugin sources it cites
 live under `plugins/`, so its links resolve inside this repository.
 
-The plugin sources are a snapshot of the private `local-plugins` marketplace.
-Edits made here do not flow back automatically; keep the two in sync by hand
-or treat this repository as the publication copy.
+This repository is the publication copy of a historical plugin snapshot.
+Changes here do not automatically propagate to other installations.
 
 ## Where things live
 

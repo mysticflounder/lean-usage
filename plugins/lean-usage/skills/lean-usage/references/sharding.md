@@ -82,8 +82,11 @@ Emit one record for each helper and one for the coordinator:
 - a checksum of the rendered bytes;
 - block count and the helper imports.
 
-Module path with checksum is enough to key a build cache. Store the generator
-command and the source identity beside the manifest.
+The rendered-byte checksum is useful content identity, but module path plus
+checksum is not a complete build-cache key. Include every relevant build input,
+such as the toolchain and package/dependency revisions, transitive imports,
+compiler/build options, generator version and policy, and source identity. Store
+the generator command and these inputs beside the manifest.
 
 ## Re-shard from a normalized source
 

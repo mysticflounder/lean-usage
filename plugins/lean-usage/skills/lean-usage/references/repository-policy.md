@@ -64,18 +64,18 @@ Lean files use the mathlib-style form with no email:
 
 ```lean
 /-
-Copyright (c) 2026 Adam McKenna. All rights reserved.
+Copyright (c) [CREATION YEAR] [ACTUAL RIGHTSHOLDER(S)]. All rights reserved.
 Released under GPL-3.0-or-later as described in the file LICENSE.
-Authors: Adam McKenna
+Authors: [HUMAN AUTHOR(S) RESPONSIBLE FOR THIS FILE]
 -/
 ```
 
 Other commentable source/configuration files use the language's comment syntax:
 
 ```python
-# Copyright (c) 2026 Adam McKenna. All rights reserved.
+# Copyright (c) [CREATION YEAR] [ACTUAL RIGHTSHOLDER(S)]. All rights reserved.
 # Released under GPL-3.0-or-later as described in the file LICENSE.
-# Author: Adam McKenna <adam@mysticflounder.ai>
+# Author: [HUMAN AUTHOR(S) RESPONSIBLE FOR THIS FILE]
 ```
 
 For scripts, keep the shebang on line 1 and place the header immediately after it.
@@ -85,10 +85,19 @@ Rules:
 - List humans only. AI tools are not authors.
 - The author is the human who takes responsibility for the file's correctness.
 - Join multiple Lean authors with `, ` on one `Authors:` line.
-- Use one file header. Credit a different contributor to one declaration in its
-  docstring rather than adding another file header.
-- When adapting external work, the adapting human remains the file author; cite
-  the source according to the destination repository's provenance style.
+- Preserve existing copyright years, notices, rightsholders, and original authors;
+  do not replace them with the current contributor's details. If a correction is
+  needed, record the reason and change only what is known to be wrong.
+- Distinguish the roles in provenance: the mathematical source author wrote the
+  source result; the formalizer translated it into Lean; and an adapter changed
+  an existing source or formalization. Credit each human only for that person's
+  contribution, using a declaration docstring or source citation when a file
+  header would misattribute the work.
+- When adapting external work, preserve the source's required notices and cite it
+  according to the destination repository's provenance style. Do not infer a new
+  license or transfer ownership from the adaptation.
+- Disclose substantial AI assistance in the review or contribution record, but do
+  not list an AI system as an author, co-author, reviewer, or signatory.
 
 Mathlib/FLT-bound code commonly puts adaptation provenance in the commit/PR record
 rather than ad hoc inline comments. Local projects may require a declaration

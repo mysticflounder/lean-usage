@@ -13,7 +13,7 @@ The report cites the plugin sources in this repository, so its links resolve her
 
 | Component | Path | Purpose |
 |---|---|---|
-| `lake-build` wrapper | `plugins/lean-usage/bin/lake-build` | Global Lake build entry point: walks up to the lakefile, serializes top-level builds with a stale-PID-aware lockfile, prefetches the mathlib binary cache, caps each `lean` worker's memory through a PATH shim, and records per-build and per-module timing to JSONL logs. |
+| `lake-build` wrapper | `plugins/lean-usage/bin/lake-build` | Global Lake build entry point: walks up to the lakefile, serializes top-level builds with a stale-PID-aware lockfile, prefetches the mathlib binary cache, requests each `lean` worker's memory setting through a PATH shim (Lake may bypass the shim by invoking an absolute compiler path), and records per-build and per-module timing to JSONL logs. |
 | Guard hooks | `plugins/lean-usage/hooks/` | Deploys the wrapper at session start, warns on direct `lake`/`lean` invocations, and blocks builds when the mathlib cache is missing or stale. |
 | Skills | `plugins/lean-usage/skills/` | See the table below. |
 | Report and data | `docs/reports/` | The report, its PDF rendering, the weekly chart, and the CSV files behind it. |
@@ -61,7 +61,7 @@ For certificate custody and replay handoff, see
 The wrapper writes two JSONL logs under `~/.local/state/lean-usage/`
 (override with `LEAN_USAGE_STATE_DIR`):
 
-- `build-stats.jsonl` — one row per invocation: timestamp, project, arguments, wall time, exit code, memory, recompile-activity count, build ID, interruption flag, log path.
+- `build-stats.jsonl` — one row per invocation: timestamp, project, arguments, Lake build-phase duration, exit code, requested memory setting, recompile-activity count, build ID, interruption flag, log path. The duration excludes cache prefetch, wrapper setup, and teardown.
 - `module-build-stats.jsonl` — one row per module compile, read from Lake's `Built <module> (Ns)` progress lines, joinable to the invocation through `build_id`.
 
 The report's compile-cost figures come from the second log. Whole-run wall
@@ -100,10 +100,9 @@ edit-guard tests.
 
 ## Provenance
 
-The plugin sources are a snapshot of the private `local-plugins` marketplace
-at commit `dc1a00a`. The report was written against that marketplace's commit
-`983f660`; line anchors in the report were re-pointed to the files in this
-repository.
+The plugin sources are a historical source snapshot. The report was written
+against an earlier source revision; line anchors in the report were re-pointed
+to the files in this repository.
 
 ## License
 
