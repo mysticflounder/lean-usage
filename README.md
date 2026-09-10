@@ -25,10 +25,8 @@ model-invoked skills.
 
 | Host/event | Hook behavior |
 |---|---|
-| Claude `SessionStart` | Keeps `~/.local/bin/lake-build` pointed at the active wrapper via [`sync-lake-build.py`](plugins/lean-usage/hooks/sync-lake-build.py). |
-| Claude `PreToolUse` (Bash) | Warns on direct `lake`/`lean` calls via [`lean-direct-warn.py`](plugins/lean-usage/hooks/lean-direct-warn.py) and denies recognized raw mathlib builds with a missing or stale cache via [`mathlib-cache-check.py`](plugins/lean-usage/hooks/mathlib-cache-check.py). Managed wrapper calls proceed to their own cache prefetch. |
-| Codex `SessionStart` | Synchronizes the `lake-build` wrapper. |
-| Codex `PreToolUse` (Bash, run_command, exec_command) | Applies the same direct-build warning and mathlib-cache guard. |
+| Claude and Codex `SessionStart` | Keeps `~/.local/bin/lake-build` pointed at the active wrapper via [`sync-lake-build.py`](plugins/lean-usage/hooks/sync-lake-build.py). |
+| Claude and Codex `PreToolUse` (Bash) | Warns on direct `lake`/`lean` calls via [`lean-direct-warn.py`](plugins/lean-usage/hooks/lean-direct-warn.py) and denies recognized raw mathlib builds with a missing or stale cache via [`mathlib-cache-check.py`](plugins/lean-usage/hooks/mathlib-cache-check.py). Managed wrapper calls proceed to their own cache prefetch. |
 | Claude and Codex `PreToolUse` (file edits, patches, shell commands) | [`protect-lake-build.py`](plugins/lean-usage/hooks/protect-lake-build.py) denies direct edits and recognized shell writes to the managed `~/.local/bin/lake-build`; edit the plugin source instead. |
 
 Claude registers these in [`hooks/hooks.json`](plugins/lean-usage/hooks/hooks.json);
