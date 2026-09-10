@@ -5,6 +5,23 @@ Codex plugin marketplace, together with the engineering report that documents
 what these conventions did for Lean build throughput across several
 formalization projects.
 
+## Introduction
+
+Developed from about five months of AI session logs from attempts to solve and
+formalize open mathematical problems, lean-usage collects practical guidance for authoring and maintaining
+Lean projects: theorem reuse, profiling, generated certificates, sharding,
+certificate-bank freezing, Lean/mathlib upgrades, and proof trust audits. It
+complements a general Lean skill; the specialized sharding and certificate-generation
+workflows require separately supplied tools.
+
+The included `lake-build` wrapper coordinates same-project builds, fetches the
+mathlib cache, captures logs and timing, and records caller session/pane metadata
+when available. Companion hooks warn about direct builds and guard against
+accidental edits to the deployed wrapper. These are workflow safeguards, not hard
+CPU/memory limits or security boundaries. This is an early alpha, released under
+GPL-3.0-or-later; human-reviewed, AI-assisted contributions and issue reports are
+welcome.
+
 **Report:** [Faster Lean verification with controlled memory and CPU](docs/reports/2026-09-07-lean-optimization-report.md)
 ([PDF](docs/reports/2026-09-07-lean-optimization-report.pdf)) — Adam McKenna, 7 September 2026.
 The report cites the plugin sources in this repository, so its links resolve here.
@@ -54,7 +71,23 @@ this plugin does not install them. Tool-neutral splitting guidance is included i
 For certificate custody and replay handoff, see
 [freezing-certificate-banks.md](plugins/lean-usage/skills/lean-usage/references/freezing-certificate-banks.md).
 
-## Telemetry
+## lake-build
+
+The wrapper declines a second build while another wrapper-managed build holds the
+project lock. Its diagnostic identifies the owning process and includes the caller
+session, tmux pane, and retained build-log path when available. For example:
+
+```text
+$ lake-build
+lake-build: another build is already running (pid 87233): /Users/adam/projects/my-project/lean/.lake/lake-build.lock (sid='8a3f1937-3bb8-4c1f-b3de-dd295a470f5d', tmux_pane='%11', build_log='/Users/adam/projects/my-project/lean/.lake/lake-build-logs/87233-1789062894654733000.log')
+```
+
+The paths and IDs above are illustrative, not installation requirements. In agent
+sessions, use the PATH-independent command supplied by SessionStart in place of
+the `lake-build` shorthand. Session/pane metadata describes the active lock owner;
+it is not a guaranteed agent identity or a persistent session-history log.
+
+### Telemetry
 
 The wrapper writes two JSONL logs under `~/.local/state/lean-usage/`
 (override with `LEAN_USAGE_STATE_DIR`):
