@@ -29,11 +29,17 @@ model-invoked skills.
 | Claude `PreToolUse` (Bash) | Warns on direct `lake`/`lean` calls via [`lean-direct-warn.py`](plugins/lean-usage/hooks/lean-direct-warn.py) and denies recognized mathlib builds with a missing or stale cache via [`mathlib-cache-check.py`](plugins/lean-usage/hooks/mathlib-cache-check.py). |
 | Codex `SessionStart` | Synchronizes the `lake-build` wrapper. |
 | Codex `PreToolUse` (Bash) | Applies the same direct-build warning and mathlib-cache guard. |
+| Claude and Codex `PreToolUse` (file edits, patches, shell commands) | [`protect-lake-build.py`](plugins/lean-usage/hooks/protect-lake-build.py) denies direct edits and recognized shell writes to the managed `~/.local/bin/lake-build`; edit the plugin source instead. |
 
 Claude registers these in [`hooks/hooks.json`](plugins/lean-usage/hooks/hooks.json);
 Codex registers them in [`codex-hooks.json`](plugins/lean-usage/codex-hooks.json).
 The hook commands use `uv` and the host-provided plugin root, so they do not
 depend on Homebrew or a fixed checkout path.
+
+Hooks run only when enabled and trusted by the user. The edit guard recognizes
+common write operations; it is a workflow aid, not an operating-system security
+boundary. SessionStart preserves an unexpected regular file at the deployment
+path instead of overwriting local work.
 
 ## Skills
 
@@ -41,9 +47,14 @@ depend on Homebrew or a fixed checkout path.
 |-------|---------|-------------|
 | Lean Usage | `/lean-usage:lean-usage` | House governance for Lean 4 repositories: the `lake-build` workflow, project-indexed theorem reuse, proof obligations and tractability, axiom/native/external-evidence trust audits, promotion and publication. References cover build operations, build performance, generated proofs, proof discipline, code quality, sharding, vendoring, and the worker promotion contract. |
 | Lean Shard | `/lean-usage:lean-shard` | Split a large Lean source file into bounded helper shards plus a thin coordinator; wraps the `lean-shard` CLI (plan/apply/normalize, TOML policy, manifest, re-sharding). |
-| DRAT to Lean | `/lean-usage:drat-to-lean` | Encode a claim to CNF, solve with CaDiCaL, trim to LRAT, and emit a kernel-checked Lean 4 proof. |
+| DRAT to Lean | `/lean-usage:drat-to-lean` | Drive a compatible external CNF/DRAT/LRAT pipeline and emit candidate Lean proofs. Output may contain `sorry`; replay, semantic-bridge checks, and a final-consumer trust audit are required. |
 
 The `lean-shard` and `drat-to-lean` CLIs that these skills drive are not part of this repository.
+Their skills require a compatible executable or checkout supplied by the user;
+this plugin does not install them. Tool-neutral splitting guidance is included in
+[sharding.md](plugins/lean-usage/skills/lean-usage/references/sharding.md).
+For certificate custody and replay handoff, see
+[freezing-certificate-banks.md](plugins/lean-usage/skills/lean-usage/references/freezing-certificate-banks.md).
 
 ## Telemetry
 
@@ -83,8 +94,9 @@ Requirements: Python 3 through `uv`, `jq`, Lean 4 with Lake, and
 scripts/test.sh
 ```
 
-This checks that every plugin's Claude and Codex manifests carry the same
-version, then runs the wrapper's lock, shim, and telemetry tests.
+This checks that every plugin's Claude, Codex, and compatibility manifests carry
+the same version, then runs the wrapper's lock, shim, telemetry, and deployed-file
+edit-guard tests.
 
 ## Provenance
 

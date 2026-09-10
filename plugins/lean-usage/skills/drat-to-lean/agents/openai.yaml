@@ -1,4 +1,4 @@
 interface:
   display_name: "DRAT to Lean"
-  short_description: "Turn CNF UNSAT results into checked Lean proofs"
-  default_prompt: "Use $drat-to-lean to run the CNF-to-DRAT-to-Lean proof pipeline."
+  short_description: "Turn CNF UNSAT results into auditable Lean proof candidates"
+  default_prompt: "Use $drat-to-lean with a supplied checkout, then audit the source-to-CNF bridge and final consumer trust before accepting the generated Lean theorem."

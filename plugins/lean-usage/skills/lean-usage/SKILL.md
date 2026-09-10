@@ -91,6 +91,10 @@ separate gates; passing one does not satisfy the other.
 
 ## Proof obligations and tractability
 
+The summary below covers common gates. [proof-discipline.md](references/proof-discipline.md)
+is the canonical policy; consult it for the full contract and resolve any summary
+drift in its favor, subject to the target repository's instruction precedence.
+
 - Before reporting a goal blocked or escalating proof work, record the bounded
   standard automation attempted under the generic Lean skill and the exact remaining
   goal and relevant hypotheses. If an attempt was inapplicable or execution was

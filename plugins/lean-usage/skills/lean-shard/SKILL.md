@@ -7,15 +7,19 @@ description: "Use when a Lean source file is too large because of compile time, 
 
 CLI for splitting one Lean source file into helper shards (each ≤ a byte budget) plus a coordinator that imports them in order.
 
-**Binary:** `~/bin/lean-shard` (symlink to `~/projects/rustprojects/target/release/lean-shard`)
-**Source:** `~/projects/rustprojects/lean-shard/` (`lean-shard` CLI, `lean-sharding-core` library)
-**Spec:** `~/projects/rustprojects/lean-shard/usage.md`
+This distribution does not include the `lean-shard` executable or its source
+library. Use a binary supplied by the user or a user-provided checkout. Before
+running a workflow, discover the executable on `PATH` (for example,
+`command -v lean-shard`) or use the supplied checkout's explicit binary path,
+then run `lean-shard --help` to confirm that the installed CLI supports the
+subcommands below. Do not assume a checkout, installation directory, or
+download URL; if the tool is unavailable, ask the user to provide one.
 
 ## Subcommands
 
 | Command     | What it does                                                             |
 |-------------|--------------------------------------------------------------------------|
-| `plan`      | Parse + plan + render in memory; emit manifest. **No files written.**    |
+| `plan`      | Parse + plan + render in memory; emit manifest. No shard source or coordinator files are written; `--manifest <path>` explicitly writes the manifest. |
 | `apply`     | Same as `plan`, plus write helpers + coordinator under `--output-dir`.   |
 | `normalize` | Strip stale helper imports; emit canonical re-shardable form. Idempotent. |
 
@@ -110,7 +114,12 @@ drop_import_regex = '^Pkg\.Gen\.'        # optional: prunes prior-run helper imp
 }
 ```
 
-`checksum = sha256(rendered_bytes)`. Combined with `module_path`, that pair is enough to key a build cache.
+`checksum = sha256(rendered_bytes)`. The checksum identifies the rendered
+source, but `checksum + module_path` alone is not a sufficient build-cache key.
+A cache key must also account for the Lean toolchain/compiler identity,
+transitive imports and their interfaces, the effective policy and adapter
+options, and relevant build flags. The manifest is therefore useful cache
+input, not a complete cache identity by itself.
 
 ## Determinism
 

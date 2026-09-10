@@ -4,7 +4,7 @@
 # Author: Adam McKenna <adam@mysticflounder.ai>
 #
 # test.sh — run the repository checks: manifest version parity for every
-# plugin, then the lake-build wrapper's lock/shim/telemetry tests.
+# plugin, then the lake-build wrapper's lock/shim/telemetry and edit-guard tests.
 #
 # Usage:
 #   scripts/test.sh

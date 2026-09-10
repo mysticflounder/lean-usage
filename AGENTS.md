@@ -30,7 +30,7 @@ or treat this repository as the publication copy.
 | Plugin hooks (Claude) | `plugins/lean-usage/hooks/*.py` + `plugins/lean-usage/hooks/hooks.json` |
 | Plugin hooks (Codex) | `plugins/lean-usage/codex-hooks.json` (paths resolve through `${PLUGIN_ROOT}`; no checkout-specific edit) |
 | The `lake-build` wrapper | `plugins/lean-usage/bin/lake-build` (deployed to `~/.local/bin/lake-build` by the SessionStart hook) |
-| Wrapper tests | `plugins/lean-usage/scripts/test_lake_build_lock.py` |
+| Wrapper tests | `plugins/lean-usage/scripts/test_lake_build_lock.py` and `plugins/lean-usage/scripts/test_lake_build_edit_guard.py` |
 | Engineering report | `docs/reports/2026-09-07-lean-optimization-report.md` (+ `.pdf`, `assets/`) |
 | Repo scripts | `scripts/test.sh`, `scripts/check-manifest-versions.sh` |
 
@@ -42,8 +42,10 @@ or treat this repository as the publication copy.
   `scripts/check-manifest-versions.sh` reports drift; `--fix` resyncs the other
   two to Claude.
 - **The file the `hooks` key names must be committed.**
-- Builds in Lean projects go through `lake-build`, never raw `lake build` or
-  `lean`; the `lean-direct-warn` hook enforces this.
+- Builds in Lean projects go through `lake-build`; the `lean-direct-warn` hook
+  warns on direct build calls. Deliberate single-file checks and authorized
+  mathlib source builds follow the skill's build-operations reference and
+  the target project's policy.
 - Python runs through `uv` (`uv run --no-project python …`); no bare `python3`
   or `pip`.
 - Shell and Python sources carry the header block: copyright, "Released under

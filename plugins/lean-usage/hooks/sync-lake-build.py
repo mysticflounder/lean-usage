@@ -13,7 +13,7 @@ plugin-shipped global build wrapper.
 `lake-build` is the single global Lean/Lake build wrapper. The skill and the
 lean-direct-warn hook refer to it by bare name, so it has to be on $PATH; this
 symlink keeps ~/.local/bin/lake-build pointing at whatever version of the
-script is in the active plugin cache (same pattern as py-run / auto-compact).
+script is in the active plugin cache.
 
 Best-effort: exits 0 on success or failure — the symlink not being in place is
 never a reason to block session start.
@@ -25,14 +25,8 @@ from pathlib import Path
 
 
 def install_symlink() -> None:
-    # Self-locate the plugin root from this script's own path rather than
-    # $CLAUDE_PLUGIN_ROOT. Under Codex this hook is invoked by a fixed
-    # source-repo path (so it survives Codex deleting the versioned cache dir on
-    # plugin update — the Claude-side hooks/hooks.json still uses
-    # ${CLAUDE_PLUGIN_ROOT}), and Codex does not reliably set that env var for a
-    # fixed-path command. hooks/ and bin/ are siblings in both the source tree
-    # and every host's plugin cache, so parent.parent is the plugin root; the
-    # resolved Claude cache path is identical to $CLAUDE_PLUGIN_ROOT.
+    # Resolve the plugin root from the running script. hooks/ and bin/ are
+    # siblings in both a source checkout and an installed host cache.
     plugin_root = Path(__file__).resolve().parent.parent
     src = plugin_root / "bin" / "lake-build"
     if not src.is_file():

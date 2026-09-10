@@ -67,6 +67,14 @@ bare name is not found:
 Also confirm that `~/.local/bin` is on `PATH`. Every rule in this skill that names
 `lake-build` applies to whichever of these entry points is in use.
 
+The `protect-lake-build` PreToolUse hook denies file edits, patches, and recognized
+shell writes to the deployed `~/.local/bin/lake-build`. Make wrapper changes in
+`plugins/lean-usage/bin/lake-build` in the plugin source, then update the installed
+plugin. Reads and normal wrapper execution remain available. Hooks run only when
+enabled and trusted; shell recognition is heuristic, so this is a workflow aid,
+not a guarantee against arbitrary writes. SessionStart also preserves an unexpected
+regular file at the deployment path rather than overwriting possible local work.
+
 ## Limits and concurrency
 
 The lock records the wrapper PID on its first line and a JSON object on its

@@ -1,4 +1,4 @@
-# lean-usage skill audit — open items
+# lean-usage skill audit — closeout
 
 Date: 2026-09-09
 Scope: `plugins/lean-usage/skills/` (`lean-usage`, `lean-shard`, `drat-to-lean`),
@@ -6,65 +6,53 @@ their references, `plugins/lean-usage/rules/AGENTS.md`, and the repository files
 those skills describe.
 
 Findings 1-6 and 9-16 were applied in the same session; they are listed at the
-end for the record. The items below are still open.
+end for the record. The A-D follow-up items and the missed README trust claim
+were resolved in the closeout below. No repository-controlled items remain open.
 
-## Open
+## Resolved follow-up
 
 ### A. Private home paths in two skills
 
-Both skills point at a home directory, so no other installation can follow them.
+The skills now describe both CLIs as user-supplied external dependencies. They
+support portable discovery on `PATH` or an explicit path in a supplied checkout,
+and tell the reader when a compatible executable or checkout is unavailable.
+They no longer require a private home-directory layout, invent a release URL, or
+promise an installation route that this repository cannot provide.
 
-| File | Lines | Content |
-|---|---|---|
-| `plugins/lean-usage/skills/drat-to-lean/SKILL.md` | 3, 15, 22, 120 | `~/the-missing-pair` |
-| `plugins/lean-usage/skills/lean-shard/SKILL.md` | 10, 11, 12 | `~/bin/lean-shard`, `~/projects/rustprojects/lean-shard/`, its `usage.md` |
-
-The report already cites the DRAT pipeline at
-`github.com/flound1129/the-missing-pair`, so that skill needs the public URL, not
-a new location. The `lean-shard` CLI has no public location in this repository or
-in the report; reference 71 of the report points at the SKILL.md itself, at the
-old `plugins/math-toolchain/…` path and pinned commit `4b796af`.
-
-Action when the two CLIs are released: replace each home path with the release
-URL, keep the home path only as an optional local convenience, and say how a
-reader installs the tool. {{NEEDS_ADAM_INPUT}} — the release URLs.
-
-Related: `plugins/lean-usage/skills/drat-to-lean/SKILL.md:106,130` cites
-`docs/2026-04-18-cadical-usage-cleanup.md`, a file inside that same repo. Once the
-repo is public the citation resolves; until then it is unreachable for a reader.
+This resolves the portability and claim-scope defect; it does not claim that the
+external source release exists, is public, or has been installed. The report's
+existing provenance links, including the historical pinned `plugins/math-toolchain`
+reference, remain unchanged.
 
 ### B. SKILL.md repeats proof-discipline.md
 
-`plugins/lean-usage/skills/lean-usage/SKILL.md` carries about 35 lines under
-"Proof obligations and tractability" that restate
-`references/proof-discipline.md`. The two texts agree now — the "anchored `sorry`"
-wording was aligned in this pass — but every future policy change has to be made
-twice.
-
-Options: keep the summary (progressive disclosure, one read for the common case),
-or cut it to the gate plus a pointer. Not a defect either way.
-{{NEEDS_ADAM_INPUT}} — which shape you want.
+The common-case summary is intentionally retained for progressive disclosure.
+It now opens with the canonical policy sentence: `proof-discipline.md` is the
+canonical policy; readers must consult it for the full contract and resolve any
+summary drift in its favor, subject to repository instruction precedence. The
+summary remains a concise gate overview rather than a competing policy source.
 
 ### C. Internal plugin names in a hook docstring
 
-`plugins/lean-usage/hooks/sync-lake-build.py:16` says "same pattern as py-run /
-auto-compact". Those are private plugin names with no meaning to a reader of the
-public plugin. Left untouched because another agent held that file during the
-audit.
+The `sync-lake-build.py` docstring no longer names private plugins such as
+`py-run` or `auto-compact`. The Codex hook documentation also uses the host's
+`${PLUGIN_ROOT}` resolution rather than the stale fixed-checkout-path comment.
 
 ### D. Items that follow the new protect-lake-build hook
 
-The hook `plugins/lean-usage/hooks/protect-lake-build.py` and its test arrived
-during the audit and were not reviewed. When they land:
+`references/build-operations.md` now documents that `protect-lake-build.py`
+blocks file edits, patches, and recognized shell writes to the deployed wrapper.
+It carries the required caveat: hooks run only when enabled and trusted, shell
+recognition is heuristic, and the guard is workflow assistance rather than an
+operating-system security boundary. The SessionStart hook preserves an
+unexpected regular file instead of overwriting local work.
 
-- `references/build-operations.md` needs a line describing what the hook blocks,
-  with the same trust caveat the cache guard now carries: a host runs a plugin
-  hook only when the user trusts it, so the block is a convenience, not a
-  guarantee.
-- `AGENTS.md` "Where things live" lists only
-  `plugins/lean-usage/scripts/test_lake_build_lock.py` under wrapper tests; add
-  the new test file.
-- `README.md` "Plugin hooks" table needs the new row for both hosts.
+`README.md` now has the Claude/Codex protect-hook row and repeats the trust,
+heuristic, and regular-file-preservation caveats. `AGENTS.md` inventories both
+wrapper tests: `test_lake_build_lock.py` and `test_lake_build_edit_guard.py`.
+
+The new `freezing-certificate-banks.md` guide was added separately; its presence
+is recorded here without folding it into the historical applied-item list.
 
 ## Applied in this pass
 
