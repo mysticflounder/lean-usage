@@ -285,4 +285,4 @@ Read [code-quality.md](references/code-quality.md) for governed review gates,
 | Headers, authorship, provenance, local literature | [repository-policy.md](references/repository-policy.md) |
 | Mathlib/FLT style and pre-review audit | [mathlib-flt-idiom.md](references/mathlib-flt-idiom.md) |
 | Splitting one oversized module into shards plus a coordinator | [sharding.md](references/sharding.md) |
-| Lake dependency pins, local paths, mirrors | [vendoring.md](references/vendoring.md) |
+| Lean/mathlib upgrades, dependency pins, local paths, mirrors | [vendoring.md](references/vendoring.md) |

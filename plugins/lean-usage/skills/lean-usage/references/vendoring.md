@@ -33,6 +33,40 @@ invalidate downloaded oleans and force source elaboration or fail to load them.
 Confirm the compatibility declared by the chosen mathlib release; do not infer it
 only from similar version numbers.
 
+## Upgrading Lean and mathlib
+
+For substantial version jumps, prefer one compatible Lean/mathlib release pair
+at a time. At each step, when authorized by project policy, build through
+`lake-build`, resolve deprecation
+warnings, and commit a working checkpoint before proceeding. This preserves the
+opportunity to use replacement-name warnings before old aliases disappear;
+simply changing the pins through intermediate versions without building and
+repairing the code does not help.
+
+Mathlib's [deprecation policy](https://leanprover-community.github.io/contribute/style.html#deprecation)
+(checked 9 September 2026) allows deprecated declarations to be deleted after
+six months. Renames normally retain a deprecated alias with replacement guidance,
+but there are exceptions, including named instances. The window is measured from
+each declaration's deprecation date, not by counting releases: a five-release
+jump does not by itself establish that an alias expired. Incremental upgrades are
+a migration heuristic, not a guarantee against breaking changes.
+
+Start from a working baseline on a migration branch. For each chosen release,
+check mathlib's declared Lean compatibility, regenerate and review the dependency
+manifest, and confirm cache prefetch before evaluating project build cost. Do not
+suppress deprecation warnings to obtain a clean checkpoint. If a name has already
+disappeared, inspect an earlier revision's alias or upstream history for the
+replacement rather than guessing from similar names.
+
+Before accepting the upgrade, rerun the project's trust checks (including axiom
+closure and native/external-evidence policy checks) and compare build
+performance under comparable cache and resource conditions. Toolchain changes
+invalidate assumptions about reusable compiled artifacts; consult
+[generated-proofs.md](generated-proofs.md) and preserve the old environment and
+provenance for [frozen certificate banks](freezing-certificate-banks.md), if applicable.
+Keep the last working `lean-toolchain`, dependency pins, and manifest checkpoint
+available for rollback.
+
 ## Local path dependencies
 
 Use a path requirement for deliberate sibling co-development:
