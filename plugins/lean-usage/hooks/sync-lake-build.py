@@ -18,6 +18,7 @@ script is in the active plugin cache (same pattern as py-run / auto-compact).
 Best-effort: exits 0 on success or failure — the symlink not being in place is
 never a reason to block session start.
 """
+import json
 import os
 import sys
 from pathlib import Path
@@ -40,6 +41,10 @@ def install_symlink() -> None:
     target = target_dir / "lake-build"
     try:
         target_dir.mkdir(parents=True, exist_ok=True)
+        # A regular file is unexpected and may contain local work. Preserve it;
+        # the PreToolUse guard should prevent agents from creating one here.
+        if os.path.lexists(target) and not target.is_symlink():
+            return
         if target.is_symlink() and Path(os.readlink(target)) == src:
             return
         tmp = target_dir / f".lake-build.{os.getpid()}"

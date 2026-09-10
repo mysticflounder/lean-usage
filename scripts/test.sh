@@ -13,3 +13,4 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 "$ROOT/scripts/check-manifest-versions.sh"
 cd "$ROOT/plugins/lean-usage"
 uv run --no-project python scripts/test_lake_build_lock.py
+uv run --no-project python scripts/test_lake_build_edit_guard.py
