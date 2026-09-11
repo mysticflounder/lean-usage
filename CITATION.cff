@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use lean-usage, please cite it using these metadata."
+title: "lean-usage"
+abstract: >-
+  A Claude Code and Codex plugin for governed Lean 4 development, including
+  coordinated Lake builds, build telemetry, proof and evidence standards,
+  certificate-generation guidance, and project-maintenance workflows.
+authors:
+  - family-names: "McKenna"
+    given-names: "Adam"
+    email: "adam@mysticflounder.ai"
+type: software
+version: "0.1.72"
+date-released: "2026-09-10"
+repository-code: "https://github.com/mysticflounder/lean-usage"
+url: "https://github.com/mysticflounder/lean-usage"
+license: "GPL-3.0-or-later"
+keywords:
+  - "Lean 4"
+  - "formalization"
+  - "theorem proving"
+  - "Claude Code"
+  - "Codex"
