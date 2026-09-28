@@ -14,6 +14,24 @@ chain. Read [repository-policy.md](references/repository-policy.md) to record th
 effective contract. In particular, `lake-build` is the required build path when a
 build is authorized; it is not permission to build through an explicit no-build gate.
 
+## Security boundary for Lean input
+
+Treat a downloaded Lean repository, package, generated source file, `lakefile`, and
+build documentation that drives commands as untrusted input until it has been
+reviewed. Lean checking is not a passive parse: `#eval` compiles and runs code,
+module initializers and custom elaborators/tactics can run during elaboration, and
+Lake configuration or imported native/FFI code can start other programs. Opening a
+file in an editor with an active Lean language server can therefore cross the same
+boundary.
+
+Before checking or building untrusted input, review the source, dependencies, and
+build files first. Minimize the permissions, filesystem access, credentials, and
+network available to the process, and use separately administered isolation when the
+threat model requires it. Do not treat a source scan, axiom audit, kernel check,
+wrapper lock, hook, or regex as a host security boundary. Read
+[build-operations.md](references/build-operations.md#security-boundary) before
+processing downloaded formalizations.
+
 ## Core workflow
 
 1. **Read the live project contract.** Discover the project and Lake roots, applicable

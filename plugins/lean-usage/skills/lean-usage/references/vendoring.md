@@ -10,7 +10,7 @@ editing it by hand.
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "v4.29.0"
+rev = "v4.34.1"
 ```
 
 - A full commit SHA identifies immutable content.
@@ -25,6 +25,20 @@ Cache availability is artifact- and commit-dependent, not tag-dependent. Release
 usually have broad coverage, but an arbitrary commit can also hit when matching
 artifacts were uploaded. Confirm the exact cache result rather than inferring it
 from how `rev` is spelled.
+
+As verified on 2026-09-27, the current stable Lean and mathlib release tags are
+both `v4.34.1`: [Lean release](https://github.com/leanprover/lean4/releases/tag/v4.34.1)
+and [mathlib4 release](https://github.com/leanprover-community/mathlib4/releases/tag/v4.34.1).
+The matching mathlib release declares this exact toolchain in its
+[lean-toolchain file](https://raw.githubusercontent.com/leanprover-community/mathlib4/v4.34.1/lean-toolchain):
+
+```text
+leanprover/lean4:v4.34.1
+```
+
+When selecting a different release later, recheck the latest stable release and the
+selected mathlib revision's declared compatibility together; do not update a lone
+toolchain or dependency pin by version-number resemblance.
 
 ## Match `lean-toolchain`
 

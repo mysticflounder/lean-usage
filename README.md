@@ -29,6 +29,10 @@ CPU/memory limits or security boundaries. This is an early alpha, released under
 GPL-3.0-or-later; human-reviewed, AI-assisted contributions and issue reports are
 welcome.
 
+Checking a downloaded Lean formalization can execute code with the checking
+process's file, credential, and network access. See the example
+[security recommendations](examples/security.md) before loading unfamiliar projects.
+
 **Report:** [Faster Lean verification with controlled memory and CPU](docs/reports/2026-09-07-lean-optimization-report.md)
 ([PDF](docs/reports/2026-09-07-lean-optimization-report.pdf)) — Adam McKenna, 7 September 2026.
 The report cites the plugin sources in this repository, so its links resolve here.
@@ -165,7 +169,9 @@ the same version, then runs the wrapper's lock, shim, telemetry, deployed-file
 edit-guard, and build-hook event tests. Synthetic hook events do not replace
 live host integration testing.
 
-For an isolated Linux test with a real Lean 4.28.0 toolchain:
+For a Linux smoke test in Docker with the pinned
+[Lean 4.34.1](https://github.com/leanprover/lean4/releases/tag/v4.34.1) toolchain
+(latest stable checked 27 September 2026):
 
 ```bash
 bash scripts/test-docker.sh

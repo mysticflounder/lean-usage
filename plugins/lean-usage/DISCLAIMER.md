@@ -21,7 +21,10 @@ Possible consequences include lost, overwritten, corrupted, or exposed data;
 incorrect proofs or research conclusions; misleading verification claims; service
 interruption; security incidents; unexpected costs; and damage to other software
 or workflows. Guard hooks are heuristic workflow aids, not security boundaries.
-The wrapper does not provide hard CPU or memory isolation. AI agents may disregard
+The wrapper does not provide hard CPU or memory isolation, and ordinary Lean/Lake
+invocations run with the caller's permissions. Checking untrusted Lean can execute
+code through evaluation, initialization, elaborators, build configuration, native
+or foreign-function interfaces, and subprocesses. AI agents may disregard
 instructions or act outside the intended workflow.
 
 Review the code and permissions before enabling it. Use isolated environments,

@@ -13,6 +13,8 @@
 # "Built <module> (Ns)" progress lines — into a second JSONL file
 # (module-build-stats.jsonl). An interrupt (Ctrl-C / SIGTERM) still records a
 # partial per-build record and keeps the already-written per-module records.
+# Security: checking/building can execute project and dependency code. This
+# wrapper provides build coordination and telemetry, not security isolation.
 # Deployed to ~/.local/bin/lake-build by the lean-usage SessionStart hook.
 """Python port of the lake-build wrapper (formerly a bash script).
 
@@ -76,6 +78,19 @@ Examples:
   {PROG} Foo.Bar           # build one target
   {PROG} --jobs 4          # forwarded to `lake build` (advisory, not a hard cap)
   MEMORY_MB=8192 {PROG}    # request a lower per-worker memory limit
+
+Security:
+  Checking and building Lean can execute #eval, tactics/elaborators, imported
+  initializers, Lake configuration, and dependency code. That code can read or
+  change files, read environment credentials, launch processes, and use the
+  network wherever the calling process has permission.
+  This wrapper adds no security isolation. Locks, memory-limit requests, cached
+  artifacts, and successful proof checks do not establish that code is safe.
+  Treat unfamiliar formalizations as untrusted software. Inspect the source,
+  build configuration, and dependencies before allowing Lean, Lake, or a Lean
+  language server to load them. Prefer a separate environment with minimal
+  sensitive data and privileges, and assess its restrictions independently.
+  A container alone is not a guarantee of safety.
 
 Environment:
   LEAN_ROOT             Explicit Lake root (overrides discovery).
@@ -458,6 +473,12 @@ def main() -> int:
             "(set LEAN_ROOT to override)"
         )
         return 1
+
+    err(
+        f"{PROG}: security warning: checking/building Lean can execute project and "
+        "dependency code with inherited file, network, and environment access."
+    )
+    err(f"{PROG}: this wrapper provides no security isolation; see --help for recommendations.")
 
     memory_mb = _env_int("MEMORY_MB", 16384)
     configured_lockfile = os.environ.get("LOCKFILE")

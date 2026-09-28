@@ -6,11 +6,37 @@ exceptions, and mathlib cache. For timing/profiling, read
 
 ## Contents
 
+- [Security boundary](#security-boundary)
 - [`lake-build`](#lake-build)
 - [Environment overrides](#environment-overrides)
 - [Limits and concurrency](#limits-and-concurrency)
 - [Direct `lake env lean` exceptions](#direct-lake-env-lean-exceptions)
 - [Mathlib cache](#mathlib-cache)
+
+## Security boundary
+
+`lake-build` coordinates builds; it is not a sandbox. Lean, Lake, the active language
+server, and their child processes run with the permissions of their caller. A
+successful kernel check or axiom audit says something about the proof's logical
+trust boundary, not about what the build process could read, write, execute, or
+send over the network.
+
+Treat downloaded formalizations and their dependencies as untrusted until reviewed.
+Checking can execute code through `#eval`, module initialization, custom tactics and
+elaborators, Lake configuration, imported native/FFI code, and subprocess APIs. The
+same applies to deliberate `lake env lean` checks and to LSP diagnostics or editor
+actions that elaborate a file. Treat editor/LSP elaboration as execution even if
+you never type a build command.
+
+For untrusted input, review the source, dependencies, and build files before starting
+Lean or the LSP. Minimize the process's filesystem, credential, and network access,
+and use separately administered isolation appropriate to the threat model. If an
+isolated environment is used, it must cover Lake, Lean, compiler helpers, package
+managers, native executables, the language server, and every child process. Wrappers,
+hooks, lock files, telemetry, source scans, and regular-expression checks are
+workflow aids and do not provide that boundary. Code review and container use do
+not by themselves establish that untrusted input is safe. The repository's
+`examples/security.md` is a copyable project policy for this warning.
 
 ## `lake-build`
 
